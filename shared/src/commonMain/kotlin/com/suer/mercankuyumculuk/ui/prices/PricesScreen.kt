@@ -263,7 +263,7 @@ private fun HeroCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val low = quote.low
                 val high = quote.high
-                if (low != null && high != null) {
+                if (low != null && high != null && high > low) {
                     Text(
                         "Gün içi  ${TrFormat.number(low, 2)} – ${TrFormat.number(high, 2)}",
                         style = MaterialTheme.typography.bodySmall.merge(TabularNumbers),
@@ -289,7 +289,11 @@ private fun updatedText(quote: PricedQuote, state: MarketState, now: Long): Stri
     if (state.fromCache) return "Son kayıtlı fiyat"
     val t = quote.updatedAtMillis ?: state.lastMessageAtMillis ?: return ""
     val diff = (now - t).coerceAtLeast(0)
-    return if (diff < 60_000) "Güncel · ${TrTime.hhmmss(t)}" else "Son güncelleme ${TrTime.dateTime(t)}"
+    if (diff < 60_000) return "Güncel · ${TrTime.hhmmss(t)}"
+    val then = TrTime.parts(t)
+    val today = TrTime.parts(now)
+    val sameDay = then.year == today.year && then.month == today.month && then.day == today.day
+    return if (sameDay) "Son güncelleme ${TrTime.hhmm(t)}" else "Son güncelleme ${TrTime.dayMonthTime(t)}"
 }
 
 @Composable

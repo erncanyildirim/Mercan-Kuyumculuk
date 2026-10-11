@@ -41,6 +41,10 @@ object TrTime {
     fun hhmmss(epochMillis: Long): String =
         parts(epochMillis).let { "${two(it.hour)}:${two(it.minute)}:${two(it.second)}" }
 
+    /** "11.10 09:15" */
+    fun dayMonthTime(epochMillis: Long): String =
+        parts(epochMillis).let { "${two(it.day)}.${two(it.month)} ${two(it.hour)}:${two(it.minute)}" }
+
     fun dateTime(epochMillis: Long): String =
         parts(epochMillis).let { "${two(it.day)}.${two(it.month)}.${it.year} ${two(it.hour)}:${two(it.minute)}" }
 
