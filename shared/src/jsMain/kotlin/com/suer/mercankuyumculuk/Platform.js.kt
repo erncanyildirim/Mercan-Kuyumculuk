@@ -15,8 +15,8 @@ internal actual fun rememberShareText(): (String) -> Unit = remember {
 }
 
 internal actual fun platformConfigEndpoints(): List<String> {
+    // The site serves its own /api/config; the public endpoints are the fallback.
     val origin = runCatching { window.location.origin }.getOrNull().orEmpty()
-    val isLocal = origin.contains("localhost") || origin.contains("127.0.0.1")
-    return if (origin.startsWith("http") && !isLocal) listOf("$origin/api/config") + AppLinks.configEndpoints
+    return if (origin.startsWith("http")) (listOf("$origin/api/config") + AppLinks.configEndpoints).distinct()
     else AppLinks.configEndpoints
 }

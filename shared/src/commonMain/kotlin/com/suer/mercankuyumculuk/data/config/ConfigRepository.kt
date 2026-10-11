@@ -63,7 +63,7 @@ class ConfigRepository(
     }
 
     /** Refreshes periodically; cancelled together with the caller's scope. */
-    suspend fun poll(intervalMs: Long = 60_000) {
+    suspend fun poll(intervalMs: Long = 120_000) {
         while (true) {
             val ok = refresh()
             delay(if (ok) intervalMs else intervalMs / 2)
