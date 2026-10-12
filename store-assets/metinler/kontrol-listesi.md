@@ -11,7 +11,7 @@ Durum işaretleri: ✅ hazır · ⏳ bekliyor · ⚠️ dikkat
 - ⏳ **Yetki belgesi** imzalanıp taranmalı (`yetki-belgesi.md`).
 - ⏳ **Android imza anahtarı.** Yayın için bir yükleme anahtarı (keystore) oluşturulmalı ve güvenli
   saklanmalı; kaybedilirse güncelleme yayınlanamaz. Play App Signing açık tutulmalı.
-- ⏳ **Apple Team ID.** Hesap açılınca `iosApp/Configuration/Config.xcconfig` içindeki `TEAM_ID` doldurulmalı.
+- ✅ **Apple Team ID** (K2MRSSMA4U) ve App Store Connect kaydı (com.suer.mercankuyumculuk) hazır.
 
 ## Apple App Store
 
