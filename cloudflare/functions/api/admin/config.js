@@ -1,8 +1,8 @@
 // GET/PUT /api/admin/config: read and save the configuration (admin only).
-import { requireAdmin } from "../../_lib/auth.js";
+import { isJson, requireAdmin } from "../../_lib/auth.js";
 import { json, readConfig, sanitizeConfig, ValidationError, writeConfig } from "../../_lib/config.js";
 
-const NO_STORE = { "Cache-Control": "no-store" };
+const NO_STORE = { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" };
 
 export async function onRequestGet({ request, env }) {
   const denied = await requireAdmin(request, env);
@@ -13,6 +13,7 @@ export async function onRequestGet({ request, env }) {
 export async function onRequestPut({ request, env }) {
   const denied = await requireAdmin(request, env);
   if (denied) return denied;
+  if (!isJson(request)) return json({ error: "Geçersiz istek" }, { status: 415 });
   let body;
   try {
     body = await request.json();

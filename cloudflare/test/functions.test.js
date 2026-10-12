@@ -38,12 +38,38 @@ test("sanitize keeps valid overrides and drops no-op entries", () => {
 });
 
 test("sanitize rejects bad input with a Turkish message", () => {
-  assert.throws(() => sanitizeConfig({ products: { ALTIN: { mode: "fixed" } } }), ValidationError);
   assert.throws(() => sanitizeConfig({ products: { "bad code": {} } }), ValidationError);
   assert.throws(() => sanitizeConfig({ products: { ALTIN: { mode: "adjust", adjUnit: "percent", sellAdj: 80 } } }), ValidationError);
   assert.throws(() => sanitizeConfig({ store: { openingHours: [{ days: [1], open: "19:00", close: "09:00" }] } }), ValidationError);
   assert.throws(() => sanitizeConfig({ store: { phone: "abc" } }), ValidationError);
   assert.throws(() => sanitizeConfig({ feed: { url: "http://evil.example" } }), ValidationError);
+});
+
+test("sanitize normalizes leftovers and empty modes", () => {
+  const clean = sanitizeConfig({
+    store: { name: "Mercan", city: "Osmaniye", mapsQuery: "", openingHours: [{ days: [1.5, 2, 9], open: "09:00", close: "19:00" }] },
+    products: {
+      ALTIN: { mode: "fixed" },
+      AYAR22: { mode: "fixed", sell: 6000, buyAdj: 999, adjUnit: "percent" },
+      KULCEALTIN: { mode: "adjust", buyAdj: 0, sellAdj: 0 },
+    },
+  });
+  assert.equal(clean.products.ALTIN, undefined);
+  assert.equal(clean.products.KULCEALTIN, undefined);
+  assert.deepEqual(clean.products.AYAR22, { mode: "fixed", visible: true, buy: null, sell: 6000, buyAdj: 0, sellAdj: 0, adjUnit: "amount" });
+  assert.deepEqual(clean.store.openingHours[0].days, [2]);
+  assert.equal(clean.store.mapsQuery, "Mercan Osmaniye");
+});
+
+test("login requires JSON and weak ETags still match", async () => {
+  const e = env();
+  const form = await login.onRequestPost({
+    request: new Request("https://example.test/api/admin/login", { method: "POST", headers: { "Content-Type": "text/plain" }, body: '{"password":"x"}' }),
+    env: e,
+  });
+  assert.equal(form.status, 415);
+  const weak = await publicConfig.onRequestGet({ request: req("/api/config", { headers: { "If-None-Match": 'W/"v0"' } }), env: e });
+  assert.equal(weak.status, 304);
 });
 
 test("tokens verify and expire", async () => {

@@ -30,7 +30,11 @@ Sınır bir gün aşılsa bile uygulamalar son kayıtlı ayarlarla ve canlı fiy
 1. Cloudflare panelinde **Add a domain** → `mercankuyumculukosmaniye.com.tr` → Free plan.
 2. Cloudflare'in verdiği iki ad sunucusunu (nameserver) alan adını aldığınız firmanın panelinde
    "DNS / Nameserver" bölümüne yazın. Etkinleşmesi birkaç saat sürebilir.
-3. Pages projesinde **Custom domains** → `mercankuyumculukosmaniye.com.tr` ekleyin. SSL otomatik ve ücretsizdir.
+3. Pages projesinde **Custom domains** → `mercankuyumculukosmaniye.com.tr` ve `www.mercankuyumculukosmaniye.com.tr`
+   ekleyin. SSL otomatik ve ücretsizdir. Alan adı eklenirken Cloudflare'in bulduğu eski A kayıtları silinmelidir.
+
+Not: `ADMIN_PASSWORD` veya `SESSION_SECRET` değiştirilirse yeni değer bir sonraki yayında (deploy) geçerli olur;
+şifre değişince açık tüm admin oturumları kapanır.
 
 ## Otomatik yayın (GitHub)
 
@@ -40,6 +44,13 @@ Bunun için GitHub deposunda **Settings → Secrets and variables → Actions** 
 - `CLOUDFLARE_API_TOKEN`: Cloudflare → My Profile → API Tokens → "Edit Cloudflare Workers" şablonu
   (Account / Cloudflare Pages: Edit izni yeterli).
 - `CLOUDFLARE_ACCOUNT_ID`: Cloudflare panelinde sağ altta yazar.
+
+## Güvenlik notları
+
+- Admin şifresi en az 12 karakter olmalı. 8 hatalı denemede giriş 15 dakika kilitlenir (en iyi çaba);
+  ücretsiz plandaki günlük 100.000 istek sınırı tahmin denemelerini de sınırlar.
+- İstenirse Cloudflare panelinde **Security → WAF → Rate limiting rules** altında `/api/admin/login` için
+  ücretsiz bir hız sınırı kuralı eklenebilir (ör. 10 saniyede 5 istek).
 
 ## Yerelde deneme
 

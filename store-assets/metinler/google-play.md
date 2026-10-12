@@ -15,7 +15,7 @@ Aşağıdaki metinler Play Console'daki alanlara olduğu gibi kopyalanabilir. Ka
 | Kategori | Finans |
 | Etiketler | Altın, Döviz, Finans |
 | İletişim telefonu | +90 543 611 80 88 |
-| İletişim e-postası | [E-POSTA ADRESİ] |
+| İletişim e-postası | mercankuyumculukosmaniye@gmail.com |
 | Web sitesi | https://mercankuyumculukosmaniye.com.tr |
 | Gizlilik politikası | https://mercankuyumculukosmaniye.com.tr/gizlilik/ |
 
@@ -73,7 +73,7 @@ Fiyatlar Harem Altın piyasa verilerinden alınır ve bilgi amaçlıdır; yatır
 **Reklamlar:** "Hayır, uygulamamda reklam yok."
 
 **İçerik derecelendirmesi (IARC):**
-- E-posta: [E-POSTA ADRESİ]
+- E-posta: mercankuyumculukosmaniye@gmail.com
 - Kategori: "Diğer tüm uygulama türleri"
 - Şiddet, cinsellik, küfür, uyuşturucu, kumar: hepsi **Hayır**
 - Kullanıcılar arası etkileşim veya içerik paylaşımı: **Hayır**

@@ -68,3 +68,4 @@ button.wide { width: 100%; margin-top: 8px; }
     .hours-row { grid-template-columns: 1fr 1fr; }
     .hours-row .days { grid-column: 1 / -1; }
 }
+input:invalid { border-color: #FF6B6B; }

@@ -102,5 +102,5 @@ Hafta sonu piyasalar kapalı olduğunda son kapanış fiyatları gösterilir ve 
 This is the official price app of Mercan Kuyumculuk, a jewelry store in Osmaniye, Türkiye, published with the store owner's written authorization (attached). No login is required. Gold and currency prices come from Harem Altın's public price feed, the reference most Turkish jewelers use, and the source is shown in the app. The app does not offer trading, payments or investment services.
 <!-- /review -->
 
-İletişim kişisi: [AD SOYAD], [TELEFON], [E-POSTA ADRESİ]
+İletişim kişisi: [AD SOYAD], [TELEFON], mercankuyumculukosmaniye@gmail.com
 Demo hesap: Gerekmiyor (giriş yok).

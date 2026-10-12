@@ -4,10 +4,10 @@ Durum işaretleri: ✅ hazır · ⏳ bekliyor · ⚠️ dikkat
 
 ## Önce yapılması gerekenler (yükleme engelleri)
 
-- ⏳ **Alan adı ve web sitesi yayında olmalı.** Gizlilik (`/gizlilik/`) ve destek (`/destek/`) sayfaları
-  hazır ama bir adreste açık değil. Mağazalar çalışmayan gizlilik bağlantısı olan uygulamayı reddeder.
-  Uygulamadaki Ayarlar bağlantıları da `AppLinks.SITE_URL` adresine gider. (4. adım)
-- ⏳ **E-posta adresi.** İki mağaza da destek için e-posta ister; metinlerdeki `[E-POSTA ADRESİ]` yerleri doldurulmalı.
+- ✅ **Web sitesi yayında:** https://mercankuyumculuk.pages.dev (gizlilik `/gizlilik/`, destek `/destek/`).
+- ⏳ **Alan adı:** `mercankuyumculukosmaniye.com.tr` Cloudflare'e yönlendirildi; etkinleşince uygulamadaki
+  bağlantılar (`AppLinks.SITE_URL`) çalışır. Mağazaya göndermeden önce adresin açıldığını kontrol edin.
+- ✅ **E-posta adresi:** mercankuyumculukosmaniye@gmail.com (mağaza metinlerine, gizlilik ve destek sayfalarına eklendi).
 - ⏳ **Yetki belgesi** imzalanıp taranmalı (`yetki-belgesi.md`).
 - ⏳ **Android imza anahtarı.** Yayın için bir yükleme anahtarı (keystore) oluşturulmalı ve güvenli
   saklanmalı; kaybedilirse güncelleme yayınlanamaz. Play App Signing açık tutulmalı.

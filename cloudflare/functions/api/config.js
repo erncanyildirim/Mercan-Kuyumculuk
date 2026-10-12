@@ -10,7 +10,9 @@ export async function onRequestGet({ request, env }) {
     "Access-Control-Allow-Origin": "*",
     "X-Robots-Tag": "noindex",
   };
-  if (request.headers.get("If-None-Match") === etag) {
+  // Cloudflare may weaken the ETag (W/"v3") when it compresses the response; compare the bare value.
+  const tags = (request.headers.get("If-None-Match") || "").split(",").map((t) => t.trim().replace(/^W\//, ""));
+  if (tags.includes(etag)) {
     return new Response(null, { status: 304, headers });
   }
   return json(doc, { headers });

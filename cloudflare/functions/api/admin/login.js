@@ -1,9 +1,10 @@
 // POST /api/admin/login {password} -> {token}
-import { clearFailures, isLocked, issueToken, recordFailure, safeEqual } from "../../_lib/auth.js";
+import { clearFailures, isJson, isLocked, issueToken, recordFailure, safeEqual } from "../../_lib/auth.js";
 import { json } from "../../_lib/config.js";
 
 export async function onRequestPost({ request, env }) {
   if (!env.ADMIN_PASSWORD) return json({ error: "ADMIN_PASSWORD tanımlı değil" }, { status: 503 });
+  if (!isJson(request)) return json({ error: "Geçersiz istek" }, { status: 415 });
   if (await isLocked(request, env)) {
     return json({ error: "Çok fazla hatalı deneme. 15 dakika sonra tekrar deneyin." }, { status: 429 });
   }

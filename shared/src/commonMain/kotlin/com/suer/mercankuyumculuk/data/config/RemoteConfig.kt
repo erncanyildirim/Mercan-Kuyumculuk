@@ -42,7 +42,7 @@ data class StoreInfo(
     val hoursText: String = "Hafta içi 09:00 – 19:00",
     val openingHours: List<OpeningHours> = listOf(OpeningHours(days = listOf(1, 2, 3, 4, 5), open = "09:00", close = "19:00")),
     val instagram: String = "",
-    val email: String = "",
+    val email: String = "mercankuyumculukosmaniye@gmail.com",
     val website: String = "",
 )
 

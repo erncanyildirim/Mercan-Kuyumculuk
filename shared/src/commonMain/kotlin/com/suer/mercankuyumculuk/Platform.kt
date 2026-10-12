@@ -15,7 +15,14 @@ object ExternalLinks {
     fun phone(number: String) = "tel:" + number.filter { it.isDigit() || it == '+' }
 
     fun whatsapp(number: String, text: String? = null): String {
-        val digits = number.filter { it.isDigit() }.let { if (it.startsWith("0")) "9$it" else it }
+        // wa.me needs the full international number: 0543… and 543… both become 90543….
+        val digits = number.filter { it.isDigit() }.let {
+            when {
+                it.startsWith("0") -> "9$it"
+                it.length == 10 && it.startsWith("5") -> "90$it"
+                else -> it
+            }
+        }
         return "https://wa.me/$digits" + (text?.let { "?text=" + it.encodeURLParameter() } ?: "")
     }
 

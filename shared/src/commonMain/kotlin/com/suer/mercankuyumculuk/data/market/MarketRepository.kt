@@ -16,6 +16,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -125,33 +128,34 @@ class MarketRepository(
         feedJob = job?.let { parent -> scope.launch(parent) { runFeed() } } ?: scope.launch { runFeed() }
     }
 
+    /** Keeps the live connection open; restarts it whenever the admin switches the feed or its address. */
     private suspend fun runFeed() {
-        var attempt = 0
-        while (true) {
-            val feedConfig = configRepository.config.value.feed
+        configRepository.config.map { it.feed }.distinctUntilChanged().collectLatest { feedConfig ->
             if (!feedConfig.enabled) {
                 connection.value = ConnectionStatus.PAUSED
-                delay(30_000)
-                continue
+                return@collectLatest
             }
-            connection.value = if (attempt == 0) ConnectionStatus.CONNECTING else connection.value
-            try {
-                feed.prices(feedConfig.url).collect { delta ->
-                    attempt = 0
-                    raw.update { it + delta }
-                    lastMessageAt.value = clock()
-                    connection.value = ConnectionStatus.LIVE
-                    fromCache.value = false
-                    persist(force = false)
+            var attempt = 0
+            connection.value = ConnectionStatus.CONNECTING
+            while (true) {
+                try {
+                    feed.prices(feedConfig.url).collect { delta ->
+                        attempt = 0
+                        raw.update { it + delta }
+                        lastMessageAt.value = clock()
+                        connection.value = ConnectionStatus.LIVE
+                        fromCache.value = false
+                        persist(force = false)
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Throwable) {
+                    // fall through to reconnect
                 }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (_: Throwable) {
-                // fall through to reconnect
+                attempt++
+                connection.value = if (attempt >= OFFLINE_AFTER_ATTEMPTS) ConnectionStatus.OFFLINE else ConnectionStatus.RECONNECTING
+                delay(backoffMs(attempt))
             }
-            attempt++
-            connection.value = if (attempt >= OFFLINE_AFTER_ATTEMPTS) ConnectionStatus.OFFLINE else ConnectionStatus.RECONNECTING
-            delay(backoffMs(attempt))
         }
     }
 
@@ -164,8 +168,10 @@ class MarketRepository(
     ): MarketState {
         val priced = ArrayList<PricedQuote>(Catalog.products.size)
         var newest: Long? = null
+        // With the feed switched off only the jeweler's fixed prices are shown.
+        val live = if (config.feed.enabled) quotes else emptyMap()
         for (product in Catalog.products) {
-            val q = PricingEngine.price(product, quotes[product.code], config.products[product.code]) ?: continue
+            val q = PricingEngine.price(product, live[product.code], config.products[product.code]) ?: continue
             priced += tickTracker.track(q)
             val t = q.updatedAtMillis
             if (t != null && (newest == null || t > newest)) newest = t

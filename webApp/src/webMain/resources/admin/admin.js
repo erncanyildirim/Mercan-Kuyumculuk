@@ -21,7 +21,7 @@ const DEFAULTS = {
     hoursText: "Hafta içi 09:00 – 19:00",
     openingHours: [{ days: [1, 2, 3, 4, 5], open: "09:00", close: "19:00" }],
     instagram: "",
-    email: "",
+    email: "mercankuyumculukosmaniye@gmail.com",
     website: "",
   },
   announcement: { enabled: false, text: "", style: "info" },
@@ -48,8 +48,10 @@ function parseNum(text) {
   if (text === null || text === undefined) return null;
   let s = String(text).trim().replace(/\s|₺/g, "");
   if (!s) return null;
+  // Same rules as TrFormat.parseInput: "10.900" and "1.234,50" use Turkish thousands dots.
   if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
   else if ((s.match(/\./g) || []).length > 1) s = s.replace(/\./g, "");
+  else if (/^-?\d+\.\d{3}$/.test(s)) s = s.replace(".", "");
   const n = Number(s);
   return Number.isFinite(n) ? n : NaN;
 }
@@ -62,7 +64,9 @@ function adjust(value, adj, percent) {
 
 function priced(code) {
   const o = config.products[code] ?? {};
-  const raw = live[code];
+  const r = live[code];
+  // The feed lists inactive codes without prices; the app hides those (PricingEngine).
+  const raw = r && (r.buy !== null || r.sell !== null) ? r : null;
   if (o.visible === false) return null;
   if (o.mode === "fixed" && (o.buy || o.sell)) return { buy: o.buy || null, sell: o.sell || null };
   if (!raw) return null;
@@ -71,6 +75,16 @@ function priced(code) {
     return { buy: adjust(raw.buy, o.buyAdj || 0, pct), sell: adjust(raw.sell, o.sellAdj || 0, pct) };
   }
   return { buy: raw.buy, sell: raw.sell };
+}
+
+/** Config without no-op product entries, used to decide whether anything changed. */
+function normalized(c) {
+  const products = {};
+  for (const [code, o] of Object.entries(c.products)) {
+    const noop = (o.mode ?? "live") === "live" && o.visible !== false;
+    if (!noop) products[code] = o;
+  }
+  return JSON.stringify({ ...c, products });
 }
 
 // ---------- api ----------
@@ -98,6 +112,7 @@ async function api(path, options = {}) {
 function showLogin(message = "") {
   token = null;
   sessionStorage.removeItem(TOKEN_KEY);
+  // Unsaved edits stay in memory and are shown again after logging back in.
   $("#editor-view").hidden = true;
   $("#logout").hidden = true;
   $("#login-view").hidden = false;
@@ -115,7 +130,7 @@ async function showEditor() {
   ]);
   catalog = cat.products;
   config = merge(structuredClone(DEFAULTS), doc);
-  saved = JSON.stringify(config);
+  saved = normalized(config);
   renderGroupFilter();
   renderProducts();
   renderFields();
@@ -201,8 +216,8 @@ function productCard(p) {
   const body = $("[data-body]", card);
   if (mode === "adjust") {
     body.innerHTML = `
-      <label>Alışa ekle <input data-k="buyAdj" inputmode="decimal" placeholder="0"></label>
-      <label>Satışa ekle <input data-k="sellAdj" inputmode="decimal" placeholder="0"></label>
+      <label>Alışa ekle <input data-k="buyAdj" inputmode="text" placeholder="örn. -38"></label>
+      <label>Satışa ekle <input data-k="sellAdj" inputmode="text" placeholder="örn. 50"></label>
       <label>Birim <select data-k="adjUnit"><option value="amount">TL</option><option value="percent">Yüzde (%)</option></select></label>`;
     $("[data-k=buyAdj]", body).value = o.buyAdj ? String(o.buyAdj).replace(".", ",") : "";
     $("[data-k=sellAdj]", body).value = o.sellAdj ? String(o.sellAdj).replace(".", ",") : "";
@@ -210,7 +225,8 @@ function productCard(p) {
   } else if (mode === "fixed") {
     body.innerHTML = `
       <label>Alış fiyatı <input data-k="buy" inputmode="decimal"></label>
-      <label>Satış fiyatı <input data-k="sell" inputmode="decimal"></label>`;
+      <label>Satış fiyatı <input data-k="sell" inputmode="decimal"></label>
+      <p class="muted">Boş bırakılan fiyat yerine canlı fiyat gösterilir.</p>`;
     $("[data-k=buy]", body).value = o.buy ? String(o.buy).replace(".", ",") : "";
     $("[data-k=sell]", body).value = o.sell ? String(o.sell).replace(".", ",") : "";
   }
@@ -218,7 +234,8 @@ function productCard(p) {
     input.addEventListener("input", () => {
       const k = input.dataset.k;
       const v = k === "adjUnit" ? input.value : parseNum(input.value);
-      input.setCustomValidity(Number.isNaN(v) ? "Geçerli bir sayı girin" : "");
+      input.setCustomValidity(Number.isNaN(v) ? "Geçerli bir sayı girin, örn. 10.900 veya 1.234,50" : "");
+      if (Number.isNaN(v)) input.reportValidity();
       if (!Number.isNaN(v)) setProduct(p.code, { [k]: k === "adjUnit" ? v : v ?? (k.endsWith("Adj") ? 0 : null) });
       updateCard(card, p);
     });
@@ -275,8 +292,20 @@ function renderFields() {
     el.oninput = el.onchange = () => {
       let v = el.type === "checkbox" ? el.checked : el.value;
       if (el.dataset.field === "store.lat" || el.dataset.field === "store.lng") {
-        const n = parseNum(v);
-        v = Number.isNaN(n) ? v : n;
+        // Google Maps copies "37.0742, 36.2478": split it into both fields.
+        const pair = String(v).match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+        if (pair) {
+          config.store.lat = Number(pair[1]);
+          config.store.lng = Number(pair[2]);
+          $('[data-field="store.lat"]').value = pair[1];
+          $('[data-field="store.lng"]').value = pair[2];
+          updateDirty();
+          return;
+        }
+        const t = String(v).trim().replace(",", ".");
+        const n = t === "" ? null : Number(t);
+        el.setCustomValidity(n !== null && !Number.isFinite(n) ? "Örn. 37.0742" : "");
+        v = n !== null && Number.isFinite(n) ? n : null;
       }
       setPath(el.dataset.field, v);
       updateDirty();
@@ -317,30 +346,47 @@ function renderHours() {
 // ---------- save ----------
 
 function updateDirty() {
-  const dirty = JSON.stringify(config) !== saved;
-  $("#save").disabled = !dirty;
+  const dirty = normalized(config) !== saved;
+  const invalid = $$("#editor-view input:invalid").length > 0;
+  $("#save").disabled = !dirty || invalid || saving;
+  if (invalid) {
+    $("#save-status").textContent = "Hatalı alanları düzeltin (kırmızı çerçeveli)";
+    return;
+  }
   if (dirty) $("#save-status").textContent = "Kaydedilmemiş değişiklikler var";
   else if (!$("#save-status").dataset.keep) $("#save-status").textContent = "";
 }
 
+let saving = false;
+
 async function save() {
   const button = $("#save");
+  saving = true;
   button.disabled = true;
   $("#save-status").textContent = "Kaydediliyor…";
+  const sent = normalized(config);
   try {
     const doc = await api("/api/admin/config", { method: "PUT", body: JSON.stringify(config) });
-    config = merge(structuredClone(DEFAULTS), doc);
-    saved = JSON.stringify(config);
-    renderProducts();
-    renderFields();
-    renderHours();
+    const fresh = merge(structuredClone(DEFAULTS), doc);
+    saved = normalized(fresh);
+    if (normalized(config) === sent) {
+      config = fresh;
+      renderProducts();
+      renderFields();
+      renderHours();
+    } else {
+      // Edits made while saving stay on screen and remain unsaved.
+      config.version = fresh.version;
+    }
     $("#save-status").dataset.keep = "1";
     $("#save-status").textContent = `Kaydedildi (sürüm ${doc.version}). Uygulamalar 2 dakika içinde güncellenir.`;
     updateDirty();
     delete $("#save-status").dataset.keep;
   } catch (e) {
     if (e.message !== "unauthorized") $("#save-status").textContent = `Kaydedilemedi: ${e.message}`;
-    button.disabled = false;
+  } finally {
+    saving = false;
+    updateDirty();
   }
 }
 
@@ -402,7 +448,15 @@ $("#login-form").addEventListener("submit", async (e) => {
     token = t;
     sessionStorage.setItem(TOKEN_KEY, t);
     $("#password").value = "";
-    await showEditor();
+    if (catalog.length && normalized(config) !== saved) {
+      // Session expired with unsaved edits: keep them instead of reloading.
+      $("#login-view").hidden = true;
+      $("#editor-view").hidden = false;
+      $("#logout").hidden = false;
+      updateDirty();
+    } else {
+      await showEditor();
+    }
   } catch (err) {
     $("#login-error").textContent = err.message;
   }

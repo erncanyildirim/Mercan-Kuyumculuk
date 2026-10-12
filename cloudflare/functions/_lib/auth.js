@@ -4,6 +4,7 @@
 const TOKEN_TTL_MS = 12 * 60 * 60 * 1000;
 const MAX_FAILURES = 8;
 const LOCK_SECONDS = 15 * 60;
+const FAILURE_DELAY_MS = 750;
 
 const enc = new TextEncoder();
 
@@ -19,7 +20,8 @@ function fromB64url(text) {
 }
 
 async function hmacKey(env) {
-  const secret = env.SESSION_SECRET || env.ADMIN_PASSWORD;
+  // Both secrets feed the key, so changing the password also signs out every open session.
+  const secret = `${env.SESSION_SECRET ?? ""}:${env.ADMIN_PASSWORD ?? ""}`;
   return crypto.subtle.importKey("raw", enc.encode(`mercan-admin:${secret}`), { name: "HMAC", hash: "SHA-256" }, false, [
     "sign",
     "verify",
@@ -80,17 +82,40 @@ function failureKey(request) {
   return `login-fail:${request.headers.get("CF-Connecting-IP") || "local"}`;
 }
 
+// The lockout is best effort: KV is eventually consistent and has a daily write quota on the free
+// plan, so a KV error must never block a correct login. The free plan's daily request limit is the
+// hard ceiling on guessing; a long password (12+ characters) makes guessing impractical.
+
 export async function isLocked(request, env) {
-  const n = Number(await env.CONFIG.get(failureKey(request))) || 0;
-  return n >= MAX_FAILURES;
+  try {
+    const n = Number(await env.CONFIG.get(failureKey(request))) || 0;
+    return n >= MAX_FAILURES;
+  } catch {
+    return false;
+  }
 }
 
 export async function recordFailure(request, env) {
-  const key = failureKey(request);
-  const n = (Number(await env.CONFIG.get(key)) || 0) + 1;
-  await env.CONFIG.put(key, String(n), { expirationTtl: LOCK_SECONDS });
+  try {
+    const key = failureKey(request);
+    const n = (Number(await env.CONFIG.get(key)) || 0) + 1;
+    await env.CONFIG.put(key, String(n), { expirationTtl: LOCK_SECONDS });
+  } catch {
+    // quota exhausted or KV unavailable
+  }
+  // Slow down guessing from a single client.
+  await new Promise((resolve) => setTimeout(resolve, FAILURE_DELAY_MS));
 }
 
 export async function clearFailures(request, env) {
-  await env.CONFIG.delete(failureKey(request));
+  try {
+    if (await env.CONFIG.get(failureKey(request))) await env.CONFIG.delete(failureKey(request));
+  } catch {
+    // ignore
+  }
+}
+
+/** Requests must be JSON; browsers cannot send that cross-site without a CORS preflight we never answer. */
+export function isJson(request) {
+  return (request.headers.get("Content-Type") || "").toLowerCase().startsWith("application/json");
 }

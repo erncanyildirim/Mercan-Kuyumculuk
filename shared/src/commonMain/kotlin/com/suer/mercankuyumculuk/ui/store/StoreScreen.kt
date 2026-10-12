@@ -49,6 +49,7 @@ fun StoreScreen(store: StoreInfo, modifier: Modifier = Modifier) {
     val uri = LocalUriHandler.current
     val now = rememberNow(30_000)
     val open = isOpen(store, now)
+    val mapsQuery = store.mapsQuery.ifBlank { "${store.name} ${store.city}" }
     fun openSafely(url: String) {
         runCatching { uri.openUri(url) }
     }
@@ -102,19 +103,23 @@ fun StoreScreen(store: StoreInfo, modifier: Modifier = Modifier) {
                     }
                 }
                 ActionButton("Yol tarifi", AppIcons.Directions, c.cardHigh, c.text, Modifier.weight(1f)) {
-                    openSafely(ExternalLinks.maps(store.mapsQuery, store.lat, store.lng))
+                    openSafely(ExternalLinks.maps(mapsQuery, store.lat, store.lng))
                 }
             }
 
             AppCard(Modifier.fillMaxWidth()) {
                 Column {
-                    InfoRow(AppIcons.Place, "Adres", store.address) {
-                        openSafely(ExternalLinks.maps(store.mapsQuery, store.lat, store.lng))
-                    }
-                    HorizontalDivider(color = c.outline)
-                    InfoRow(AppIcons.Schedule, "Çalışma saatleri", store.hoursText)
-                    if (store.phone.isNotBlank()) {
+                    if (store.address.isNotBlank()) {
+                        InfoRow(AppIcons.Place, "Adres", store.address) {
+                            openSafely(ExternalLinks.maps(mapsQuery, store.lat, store.lng))
+                        }
                         HorizontalDivider(color = c.outline)
+                    }
+                    if (store.hoursText.isNotBlank()) {
+                        InfoRow(AppIcons.Schedule, "Çalışma saatleri", store.hoursText)
+                    }
+                    if (store.phone.isNotBlank()) {
+                        if (store.address.isNotBlank() || store.hoursText.isNotBlank()) HorizontalDivider(color = c.outline)
                         InfoRow(AppIcons.Call, "Telefon", formatPhone(store.phone)) {
                             openSafely(ExternalLinks.phone(store.phone))
                         }

@@ -56,12 +56,14 @@ export function sanitizeConfig(input) {
     phone: str(s.phone, 20, "Telefon"),
     whatsapp: str(s.whatsapp, 20, "WhatsApp"),
     address: str(s.address, 200, "Adres"),
-    mapsQuery: str(s.mapsQuery, 120, "Harita araması"),
+    mapsQuery: str(s.mapsQuery, 120, "Harita araması") || `${str(s.name, 60, "Mağaza adı") || "Mercan Kuyumculuk"} ${str(s.city, 40, "Şehir")}`.trim(),
     lat: num(s.lat, "Enlem", { min: -90, max: 90, optional: true }),
     lng: num(s.lng, "Boylam", { min: -180, max: 180, optional: true }),
     hoursText: str(s.hoursText, 120, "Çalışma saatleri"),
     openingHours: hours.map((h, i) => {
-      const days = Array.isArray(h?.days) ? [...new Set(h.days.map(Number))].filter((d) => d >= 1 && d <= 7).sort() : [];
+      const days = Array.isArray(h?.days)
+        ? [...new Set(h.days.map(Number))].filter((d) => Number.isInteger(d) && d >= 1 && d <= 7).sort((x, y) => x - y)
+        : [];
       const open = str(h?.open, 5, `Saat ${i + 1} açılış`);
       const close = str(h?.close, 5, `Saat ${i + 1} kapanış`);
       if (!TIME.test(open) || !TIME.test(close)) throw new ValidationError(`Saat ${i + 1}: SS:DD biçiminde yazın`);
@@ -89,21 +91,27 @@ export function sanitizeConfig(input) {
   for (const [code, p] of Object.entries(productsIn)) {
     if (!CODE.test(code)) throw new ValidationError(`Geçersiz ürün kodu: ${code}`);
     if (!p || typeof p !== "object") continue;
-    const mode = MODES.has(p.mode) ? p.mode : "live";
+    let mode = MODES.has(p.mode) ? p.mode : "live";
     const unit = UNITS.has(p.adjUnit) ? p.adjUnit : "amount";
     const adjLimit = unit === "percent" ? 50 : 1_000_000;
+    // Only the fields of the selected mode are validated and kept; values left over from another
+    // mode are dropped so they can never block a save.
+    const fixed = mode === "fixed";
+    const adjust = mode === "adjust";
     const entry = {
       mode,
       visible: bool(p.visible, true),
-      buy: num(p.buy, `${code} alış`, { min: 0, max: 100_000_000, optional: true }),
-      sell: num(p.sell, `${code} satış`, { min: 0, max: 100_000_000, optional: true }),
-      buyAdj: num(p.buyAdj, `${code} alış farkı`, { min: -adjLimit, max: adjLimit }),
-      sellAdj: num(p.sellAdj, `${code} satış farkı`, { min: -adjLimit, max: adjLimit }),
-      adjUnit: unit,
+      buy: fixed ? num(p.buy, `${code} alış`, { min: 0, max: 100_000_000, optional: true }) : null,
+      sell: fixed ? num(p.sell, `${code} satış`, { min: 0, max: 100_000_000, optional: true }) : null,
+      buyAdj: adjust ? num(p.buyAdj, `${code} alış farkı`, { min: -adjLimit, max: adjLimit }) : 0,
+      sellAdj: adjust ? num(p.sellAdj, `${code} satış farkı`, { min: -adjLimit, max: adjLimit }) : 0,
+      adjUnit: adjust ? unit : "amount",
     };
-    if (mode === "fixed" && entry.buy === null && entry.sell === null) {
-      throw new ValidationError(`${code}: sabit fiyat için en az bir fiyat girin`);
-    }
+    if (entry.buy === 0) entry.buy = null;
+    if (entry.sell === 0) entry.sell = null;
+    // A fixed price without any price shows the live price in the apps (PricingEngine); store it as live.
+    if (fixed && entry.buy === null && entry.sell === null) mode = entry.mode = "live";
+    if (adjust && entry.buyAdj === 0 && entry.sellAdj === 0) mode = entry.mode = "live";
     // Drop entries that change nothing, to keep the document small.
     const isDefault = mode === "live" && entry.visible && entry.buy === null && entry.sell === null &&
       entry.buyAdj === 0 && entry.sellAdj === 0;
