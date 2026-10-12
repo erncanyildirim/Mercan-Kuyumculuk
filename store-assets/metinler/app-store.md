@@ -71,7 +71,7 @@ Fiyatlar Harem Altın piyasa verilerinden alınır ve bilgi amaçlıdır; yatır
 
 | Cihaz | Boyut | Klasör |
 | --- | --- | --- |
-| iPhone 6,9" | 1320×2868 | `store-assets/app-store/screenshots/iphone-6.9/` |
+| iPhone 6,3" | 1206×2622 | `store-assets/app-store/screenshots/iphone-6.3/` |
 | iPad 13" | 2064×2752 | `store-assets/app-store/screenshots/ipad-13/` |
 
 ## Uygulama gizliliği (App Privacy)
