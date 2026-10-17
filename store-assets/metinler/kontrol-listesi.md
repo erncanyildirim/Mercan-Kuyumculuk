@@ -9,8 +9,8 @@ Durum işaretleri: ✅ hazır · ⏳ bekliyor · ⚠️ dikkat
   bağlantılar (`AppLinks.SITE_URL`) çalışır. Mağazaya göndermeden önce adresin açıldığını kontrol edin.
 - ✅ **E-posta adresi:** mercankuyumculukosmaniye@gmail.com (mağaza metinlerine, gizlilik ve destek sayfalarına eklendi).
 - ⏳ **Yetki belgesi** imzalanıp taranmalı (`yetki-belgesi.md`).
-- ⏳ **Android imza anahtarı.** Yayın için bir yükleme anahtarı (keystore) oluşturulmalı ve güvenli
-  saklanmalı; kaybedilirse güncelleme yayınlanamaz. Play App Signing açık tutulmalı.
+- ✅ **Android yükleme anahtarı:** `~/.mercan-signing/upload.jks` (şifresi `upload-keystore.properties` içinde).
+  Kaybedilirse güncelleme yayınlanamaz; yedeğini güvenli bir yere alın. Play App Signing açık.
 - ✅ **Apple Team ID** (K2MRSSMA4U) ve App Store Connect kaydı (com.suer.mercankuyumculuk) hazır.
 
 ## Apple App Store
