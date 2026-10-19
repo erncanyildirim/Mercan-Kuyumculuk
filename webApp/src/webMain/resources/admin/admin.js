@@ -463,6 +463,23 @@ $("#login-form").addEventListener("submit", async (e) => {
 });
 
 $("#logout").addEventListener("click", () => showLogin());
+
+// Theme switch: "system" follows the computer's light/dark setting.
+const THEME_KEY = "mercan.admin.theme";
+function applyTheme(choice) {
+  if (choice === "light" || choice === "dark") document.documentElement.dataset.theme = choice;
+  else delete document.documentElement.dataset.theme;
+  for (const b of $$("[data-theme-choice]")) b.setAttribute("aria-pressed", String(b.dataset.themeChoice === choice));
+}
+let themeChoice = "system";
+try { themeChoice = localStorage.getItem(THEME_KEY) || "system"; } catch {}
+applyTheme(themeChoice);
+for (const b of $$("[data-theme-choice]")) {
+  b.addEventListener("click", () => {
+    applyTheme(b.dataset.themeChoice);
+    try { localStorage.setItem(THEME_KEY, b.dataset.themeChoice); } catch {}
+  });
+}
 $("#save").addEventListener("click", save);
 $("#group-filter").addEventListener("change", renderProducts);
 $("#add-hours").addEventListener("click", () => {

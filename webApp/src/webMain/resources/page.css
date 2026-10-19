@@ -9,7 +9,7 @@
 }
 
 @media (prefers-color-scheme: light) {
-    :root {
+    :root:not([data-theme="dark"]) {
         --bg: #F6F5F1;
         --card: #FFFFFF;
         --line: #E3E0D6;
@@ -17,6 +17,25 @@
         --muted: #55555D;
         --gold: #7A6400;
     }
+}
+
+/* Explicit choice from the admin panel's theme switch (stored per browser). */
+:root[data-theme="light"] {
+    --bg: #F6F5F1;
+    --card: #FFFFFF;
+    --line: #E3E0D6;
+    --text: #121214;
+    --muted: #55555D;
+    --gold: #7A6400;
+}
+
+:root[data-theme="dark"] {
+    --bg: #0A0A0B;
+    --card: #17171A;
+    --line: #2B2B30;
+    --text: #F5F5F4;
+    --muted: #A6A6AE;
+    --gold: #F9DE14;
 }
 
 * { box-sizing: border-box; }

@@ -68,4 +68,10 @@ button.wide { width: 100%; margin-top: 8px; }
     .hours-row { grid-template-columns: 1fr 1fr; }
     .hours-row .days { grid-column: 1 / -1; }
 }
-input:invalid { border-color: #FF6B6B; }
+#editor-view input:invalid { border-color: #FF6B6B; }
+.theme-switch button { padding: 6px 10px; font-size: 13px; }
+@media (max-width: 560px) {
+    header { flex-wrap: wrap; }
+    .theme-switch { order: 3; width: 100%; }
+    .theme-switch button { flex: 1; }
+}

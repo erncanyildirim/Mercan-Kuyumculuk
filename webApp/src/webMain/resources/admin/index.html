@@ -7,6 +7,9 @@
     <title>Yönetim Paneli · Mercan Kuyumculuk</title>
     <meta name="theme-color" content="#0A0A0B">
     <link rel="icon" href="../favicon.ico" sizes="any">
+    <script>
+        try { const t = localStorage.getItem("mercan.admin.theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+    </script>
     <link rel="stylesheet" href="../page.css">
     <link rel="stylesheet" href="admin.css">
 </head>
@@ -17,6 +20,11 @@
         <div class="grow">
             <a href="../">Mercan Kuyumculuk</a>
             <div class="muted">Yönetim paneli</div>
+        </div>
+        <div class="seg theme-switch" role="group" aria-label="Görünüm">
+            <button type="button" data-theme-choice="system" title="Sistem ayarına göre">Sistem</button>
+            <button type="button" data-theme-choice="light" title="Gündüz modu">☀︎ Gündüz</button>
+            <button type="button" data-theme-choice="dark" title="Gece modu">☾ Gece</button>
         </div>
         <button id="logout" class="ghost" hidden>Çıkış</button>
     </header>
