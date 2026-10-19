@@ -1,0 +1,86 @@
+package com.suer.mercankuyumculuk.data.config
+
+import kotlinx.serialization.Serializable
+
+/**
+ * Configuration published by the admin panel at GET /api/config.
+ * The contract is documented in docs/api-contract.md; every field has a safe default so
+ * the apps keep working with an empty or partial document.
+ */
+@Serializable
+data class RemoteConfig(
+    val schema: Int = 1,
+    val version: Long = 0,
+    val updatedAt: String? = null,
+    val feed: FeedConfig = FeedConfig(),
+    val store: StoreInfo = StoreInfo(),
+    val announcement: Announcement = Announcement(),
+    val products: Map<String, ProductOverride> = emptyMap(),
+)
+
+@Serializable
+data class FeedConfig(
+    val url: String = DEFAULT_FEED_URL,
+    val enabled: Boolean = true,
+) {
+    companion object {
+        const val DEFAULT_FEED_URL = "wss://hrmsocketonly.haremaltin.com"
+    }
+}
+
+@Serializable
+data class StoreInfo(
+    val name: String = "Mercan Kuyumculuk",
+    val city: String = "Osmaniye",
+    val phone: String = "+905436118088",
+    val whatsapp: String = "+905436118088",
+    val address: String = "Alibeyli Mah. Atatürk Cad., Eski Belediye civarı, Merkez / Osmaniye",
+    /** Free-text search used for map links when lat/lng are not set. */
+    val mapsQuery: String = "Mercan Kuyumculuk Osmaniye",
+    val lat: Double? = null,
+    val lng: Double? = null,
+    val hoursText: String = "Hafta içi 09:00 – 19:00",
+    val openingHours: List<OpeningHours> = listOf(OpeningHours(days = listOf(1, 2, 3, 4, 5), open = "09:00", close = "19:00")),
+    val instagram: String = "",
+    val email: String = "mercankuyumculukosmaniye@gmail.com",
+    val website: String = "",
+)
+
+/** [days]: 1 = Monday … 7 = Sunday. Times are "HH:mm" in Istanbul time. */
+@Serializable
+data class OpeningHours(
+    val days: List<Int> = emptyList(),
+    val open: String = "09:00",
+    val close: String = "19:00",
+)
+
+@Serializable
+data class Announcement(
+    val enabled: Boolean = false,
+    val text: String = "",
+    /** "info" | "warning" */
+    val style: String = "info",
+)
+
+@Serializable
+data class ProductOverride(
+    /** "live" (Harem price), "adjust" (Harem price + adjustment) or "fixed" (manual price). */
+    val mode: String = MODE_LIVE,
+    val visible: Boolean = true,
+    /** Manual prices for [MODE_FIXED]. */
+    val buy: Double? = null,
+    val sell: Double? = null,
+    /** Adjustments for [MODE_ADJUST]; may be negative. */
+    val buyAdj: Double = 0.0,
+    val sellAdj: Double = 0.0,
+    /** "amount" (TL added) or "percent". */
+    val adjUnit: String = UNIT_AMOUNT,
+) {
+    companion object {
+        const val MODE_LIVE = "live"
+        const val MODE_ADJUST = "adjust"
+        const val MODE_FIXED = "fixed"
+        const val UNIT_AMOUNT = "amount"
+        const val UNIT_PERCENT = "percent"
+    }
+}

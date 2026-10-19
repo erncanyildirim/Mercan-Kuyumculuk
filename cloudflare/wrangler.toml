@@ -1,0 +1,12 @@
+# Cloudflare Pages project for the website, the admin panel and /api/config.
+# Deploy: npm run deploy   (builds nothing; run the Gradle web build first, see README)
+name = "mercankuyumculuk"
+compatibility_date = "2026-09-01"
+pages_build_output_dir = "../webApp/build/dist/composeWebCompatibility/productionExecutable"
+
+# Stores the jeweler's configuration. Create with:
+#   npx wrangler kv namespace create CONFIG
+# and paste the printed id below.
+[[kv_namespaces]]
+binding = "CONFIG"
+id = "01dc6f45ff0c45d18d645bb03230683f"
