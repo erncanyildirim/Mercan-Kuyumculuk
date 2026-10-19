@@ -34,7 +34,10 @@ data class Product(
     val calcUnit: CalcUnit? = null,
     /** Spoken name for screen readers. */
     val spokenName: String = name,
-)
+) {
+    /** Variant label shown in the app; "Eski" coins are shown without a label (admin panel still lists it). */
+    val displayVariant: String? get() = variant?.takeUnless { it == "Eski" }
+}
 
 object Catalog {
     const val HAS_ALTIN = "ALTIN"
@@ -50,17 +53,17 @@ object Catalog {
         Product("EURKG", "Kilo Altın (€)", ProductGroup.GOLD, 0, currency = "€", unitHint = "kg"),
         // Sarrafiye
         Product("CEYREK_YENI", "Çeyrek Altın", ProductGroup.COINS, 0, family = "Çeyrek", variant = "Yeni", calcUnit = CalcUnit.PIECE, spokenName = "Yeni çeyrek altın"),
-        Product("CEYREK_ESKI", "Çeyrek Altın", ProductGroup.COINS, 0, family = "Çeyrek", variant = "Eski", calcUnit = CalcUnit.PIECE, spokenName = "Eski çeyrek altın"),
+        Product("CEYREK_ESKI", "Çeyrek Altın", ProductGroup.COINS, 0, family = "Çeyrek", variant = "Eski", calcUnit = CalcUnit.PIECE, spokenName = "Çeyrek altın"),
         Product("YARIM_YENI", "Yarım Altın", ProductGroup.COINS, 0, family = "Yarım", variant = "Yeni", calcUnit = CalcUnit.PIECE, spokenName = "Yeni yarım altın"),
-        Product("YARIM_ESKI", "Yarım Altın", ProductGroup.COINS, 0, family = "Yarım", variant = "Eski", calcUnit = CalcUnit.PIECE, spokenName = "Eski yarım altın"),
+        Product("YARIM_ESKI", "Yarım Altın", ProductGroup.COINS, 0, family = "Yarım", variant = "Eski", calcUnit = CalcUnit.PIECE, spokenName = "Yarım altın"),
         Product("TEK_YENI", "Tam Altın", ProductGroup.COINS, 0, family = "Tam", variant = "Yeni", calcUnit = CalcUnit.PIECE, spokenName = "Yeni tam altın"),
-        Product("TEK_ESKI", "Tam Altın", ProductGroup.COINS, 0, family = "Tam", variant = "Eski", calcUnit = CalcUnit.PIECE, spokenName = "Eski tam altın"),
+        Product("TEK_ESKI", "Tam Altın", ProductGroup.COINS, 0, family = "Tam", variant = "Eski", calcUnit = CalcUnit.PIECE, spokenName = "Tam altın"),
         Product("ATA_YENI", "Ata Lira", ProductGroup.COINS, 0, family = "Ata", variant = "Yeni", calcUnit = CalcUnit.PIECE, spokenName = "Yeni ata lira"),
-        Product("ATA_ESKI", "Ata Lira", ProductGroup.COINS, 0, family = "Ata", variant = "Eski", calcUnit = CalcUnit.PIECE, spokenName = "Eski ata lira"),
+        Product("ATA_ESKI", "Ata Lira", ProductGroup.COINS, 0, family = "Ata", variant = "Eski", calcUnit = CalcUnit.PIECE, spokenName = "Ata lira"),
         Product("GREMESE_YENI", "Gremse", ProductGroup.COINS, 0, unitHint = "2,5 lira", family = "Gremse", variant = "Yeni", calcUnit = CalcUnit.PIECE, spokenName = "Yeni gremse"),
-        Product("GREMESE_ESKI", "Gremse", ProductGroup.COINS, 0, unitHint = "2,5 lira", family = "Gremse", variant = "Eski", calcUnit = CalcUnit.PIECE, spokenName = "Eski gremse"),
+        Product("GREMESE_ESKI", "Gremse", ProductGroup.COINS, 0, unitHint = "2,5 lira", family = "Gremse", variant = "Eski", calcUnit = CalcUnit.PIECE, spokenName = "Gremse"),
         Product("ATA5_YENI", "Ata Beşli", ProductGroup.COINS, 0, family = "Ata Beşli", variant = "Yeni", calcUnit = CalcUnit.PIECE, spokenName = "Yeni ata beşli"),
-        Product("ATA5_ESKI", "Ata Beşli", ProductGroup.COINS, 0, family = "Ata Beşli", variant = "Eski", calcUnit = CalcUnit.PIECE, spokenName = "Eski ata beşli"),
+        Product("ATA5_ESKI", "Ata Beşli", ProductGroup.COINS, 0, family = "Ata Beşli", variant = "Eski", calcUnit = CalcUnit.PIECE, spokenName = "Ata beşli"),
         // Döviz
         Product("USDTRY", "Amerikan Doları", ProductGroup.CURRENCY, 4, unitHint = "USD", calcUnit = CalcUnit.CURRENCY),
         Product("EURTRY", "Euro", ProductGroup.CURRENCY, 4, unitHint = "EUR", calcUnit = CalcUnit.CURRENCY),
@@ -103,6 +106,6 @@ object Catalog {
     /** Products offered in the calculator, in display order. */
     val calculable: List<Product> = products.filter { it.calcUnit != null }
 
-    /** Display name including the coin variant, e.g. "Çeyrek Altın (Yeni)". */
-    fun Product.fullName(): String = if (variant != null) "$name ($variant)" else name
+    /** Display name including the shown coin variant, e.g. "Çeyrek Altın (Yeni)". */
+    fun Product.fullName(): String = displayVariant?.let { "$name ($it)" } ?: name
 }

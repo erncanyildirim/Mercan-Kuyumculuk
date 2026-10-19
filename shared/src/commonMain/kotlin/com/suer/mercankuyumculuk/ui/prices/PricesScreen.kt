@@ -386,13 +386,14 @@ private fun PriceRow(quote: PricedQuote, favorite: Boolean, onToggleFavorite: ()
             )
             Spacer(Modifier.height(2.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (p.variant != null) {
-                    VariantBadge(p.variant)
+                val variant = p.displayVariant
+                if (variant != null) {
+                    VariantBadge(variant)
                     Spacer(Modifier.width(6.dp))
                 }
                 val hint = when {
                     quote.source == PriceSource.FIXED -> "Mağaza"
-                    p.variant == null -> p.unitHint
+                    variant == null && p.family == null -> p.unitHint
                     else -> null
                 }
                 if (hint != null) {
