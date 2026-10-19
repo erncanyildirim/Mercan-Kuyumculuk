@@ -36,6 +36,7 @@ let catalog = [];
 let config = structuredClone(DEFAULTS);
 let saved = "";
 const live = {};
+const view = { group: "", query: "", onlyChanged: false };
 
 // ---------- formatting ----------
 
@@ -131,7 +132,7 @@ async function showEditor() {
   catalog = cat.products;
   config = merge(structuredClone(DEFAULTS), doc);
   saved = normalized(config);
-  renderGroupFilter();
+  renderGroupChips();
   renderProducts();
   renderFields();
   renderHours();
@@ -151,24 +152,49 @@ function merge(base, doc) {
   };
 }
 
-function renderGroupFilter() {
-  const select = $("#group-filter");
-  const groups = [...new Map(catalog.map((p) => [p.group, p.groupTitle])).entries()];
-  select.length = 1;
-  for (const [g, title] of groups) select.add(new Option(title, g));
+function renderGroupChips() {
+  const root = $("#group-chips");
+  const groups = [["", "Tümü"], ...new Map(catalog.map((p) => [p.group, p.groupTitle])).entries()];
+  root.innerHTML = "";
+  for (const [g, title] of groups) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = title;
+    b.setAttribute("aria-pressed", String(view.group === g));
+    b.addEventListener("click", () => {
+      view.group = g;
+      for (const x of $$("button", root)) x.setAttribute("aria-pressed", String(x === b));
+      renderProducts();
+    });
+    root.append(b);
+  }
 }
 
 function productLabel(p) {
   return p.variant ? `${p.name} <small>${p.variant}</small>` : p.name;
 }
 
+/** Lowercase without Turkish accents, so "ceyrek" finds "Çeyrek". */
+function fold(text) {
+  return String(text ?? "").toLocaleLowerCase("tr-TR")
+    .replace(/ç/g, "c").replace(/ğ/g, "g").replace(/ı/g, "i").replace(/ö/g, "o").replace(/ş/g, "s").replace(/ü/g, "u");
+}
+
+function isCustom(o) {
+  return !!o && ((o.mode ?? "live") !== "live" || o.visible === false);
+}
+
 function renderProducts() {
-  const filter = $("#group-filter").value;
+  const query = fold(view.query.trim());
   const root = $("#products");
   root.innerHTML = "";
   let lastGroup = null;
+  let shown = 0;
   for (const p of catalog) {
-    if (filter && p.group !== filter) continue;
+    if (view.group && p.group !== view.group) continue;
+    if (view.onlyChanged && !isCustom(config.products[p.code])) continue;
+    if (query && !fold(`${p.name} ${p.variant ?? ""} ${p.groupTitle} ${p.code}`).includes(query)) continue;
+    shown++;
     if (p.group !== lastGroup) {
       lastGroup = p.group;
       const h = document.createElement("div");
@@ -178,6 +204,11 @@ function renderProducts() {
     }
     root.append(productCard(p));
   }
+  const empty = $("#no-results");
+  empty.hidden = shown > 0;
+  empty.textContent = view.onlyChanged && !query
+    ? "Özel fiyat girilmiş ürün yok. Tüm ürünler Harem Altın'ın canlı fiyatıyla gösteriliyor."
+    : "Aramanıza uygun ürün yok.";
 }
 
 function productCard(p) {
@@ -188,8 +219,7 @@ function productCard(p) {
   card.dataset.code = p.code;
   card.innerHTML = `
     <div class="head">
-      <div class="name">${productLabel(p)}</div>
-      <span class="live" data-live></span>
+      <div class="name">${productLabel(p)}<span data-badge></span><span class="live" data-live></span></div>
       <div class="seg" role="group" aria-label="${p.name} fiyat türü">
         <button type="button" data-mode="live">Canlı</button>
         <button type="button" data-mode="adjust">Fark ekle</button>
@@ -226,7 +256,7 @@ function productCard(p) {
     body.innerHTML = `
       <label>Alış fiyatı <input data-k="buy" inputmode="decimal"></label>
       <label>Satış fiyatı <input data-k="sell" inputmode="decimal"></label>
-      <p class="muted">Boş bırakılan fiyat yerine canlı fiyat gösterilir.</p>`;
+      <p class="muted">Boş bırakılan fiyat uygulamada “—” olarak görünür.</p>`;
     $("[data-k=buy]", body).value = o.buy ? String(o.buy).replace(".", ",") : "";
     $("[data-k=sell]", body).value = o.sell ? String(o.sell).replace(".", ",") : "";
   }
@@ -238,6 +268,7 @@ function productCard(p) {
       if (Number.isNaN(v)) input.reportValidity();
       if (!Number.isNaN(v)) setProduct(p.code, { [k]: k === "adjUnit" ? v : v ?? (k.endsWith("Adj") ? 0 : null) });
       updateCard(card, p);
+      updateDirty();
     });
   }
   updateCard(card, p);
@@ -257,19 +288,34 @@ function setProduct(code, patch) {
 
 function updateCard(card, p) {
   const raw = live[p.code];
-  $("[data-live]", card).textContent = raw ? `Canlı: ${fmt(raw.buy, p.decimals)} / ${fmt(raw.sell, p.decimals)}` : "Canlı: —";
+  const hasRaw = raw && (raw.buy !== null || raw.sell !== null);
+  $("[data-live]", card).innerHTML = hasRaw
+    ? `Harem canlı: alış <b>${fmt(raw.buy, p.decimals)}</b> · satış <b>${fmt(raw.sell, p.decimals)}</b>`
+    : "Harem canlı: —";
   const o = config.products[p.code];
+  const mode = o?.mode ?? "live";
+  $("[data-badge]", card).innerHTML = o?.visible === false
+    ? '<span class="badge gray">Gizli</span>'
+    : mode === "adjust" ? '<span class="badge">Fark</span>' : mode === "fixed" ? '<span class="badge">Sabit</span>' : "";
   const result = $("[data-result]", card);
   if (o?.visible === false) {
-    result.innerHTML = "Uygulamada <b>gizli</b>";
+    result.innerHTML = "<span>Bu ürün uygulamada <b>gösterilmiyor</b></span>";
   } else {
     const q = priced(p.code);
+    const diff = (v, base) => {
+      if (!hasRaw || mode === "live" || v === null || base === null) return "";
+      const d = v - base;
+      if (Math.abs(d) < 10 ** -p.decimals / 2) return "";
+      return ` <span class="diff ${d > 0 ? "up" : "down"}">${d > 0 ? "+" : "−"}${fmt(Math.abs(d), p.decimals)}</span>`;
+    };
     result.innerHTML = q
-      ? `Uygulamada: alış <b>${fmt(q.buy, p.decimals)}</b> · satış <b>${fmt(q.sell, p.decimals)}</b> ${p.currency}`
-      : "Uygulamada: fiyat yok (canlı veri bekleniyor)";
+      ? `<span>Uygulamada alış <b>${fmt(q.buy, p.decimals)}</b>${diff(q.buy, raw?.buy ?? null)}</span>` +
+        `<span>satış <b>${fmt(q.sell, p.decimals)}</b>${diff(q.sell, raw?.sell ?? null)}</span>` +
+        `<span>${p.currency}</span>`
+      : "<span>Uygulamada fiyat yok (canlı veri bekleniyor)</span>";
   }
   card.classList.toggle("hidden-product", o?.visible === false);
-  card.classList.toggle("changed", !!o && (o.mode !== "live" || o.visible === false));
+  card.classList.toggle("changed", isCustom(o));
 }
 
 // ---------- simple fields ----------
@@ -321,10 +367,10 @@ function renderHours() {
     row.className = "hours-row";
     row.innerHTML = `
       <div class="days">${DAY_NAMES.map((d, j) =>
-        `<label><input type="checkbox" value="${j + 1}" ${h.days.includes(j + 1) ? "checked" : ""}>${d}</label>`).join("")}</div>
+        `<label><input type="checkbox" value="${j + 1}" ${h.days.includes(j + 1) ? "checked" : ""}><span>${d}</span></label>`).join("")}</div>
       <input type="time" value="${h.open}" aria-label="Açılış">
       <input type="time" value="${h.close}" aria-label="Kapanış">
-      <button type="button" class="ghost" aria-label="Satırı sil">Sil</button>`;
+      <button type="button" class="ghost small" aria-label="Satırı sil">Sil</button>`;
     for (const cb of $$(".days input", row)) {
       cb.addEventListener("change", () => {
         h.days = $$(".days input", row).filter((x) => x.checked).map((x) => Number(x.value));
@@ -349,6 +395,12 @@ function updateDirty() {
   const dirty = normalized(config) !== saved;
   const invalid = $$("#editor-view input:invalid").length > 0;
   $("#save").disabled = !dirty || invalid || saving;
+  $("#discard").disabled = !dirty || saving;
+  $(".savebar").classList.toggle("dirty", dirty);
+  const custom = Object.values(config.products).filter(isCustom).length;
+  $("#override-count").textContent = custom
+    ? `${custom} üründe özel fiyat veya gizleme var`
+    : "Tüm ürünler canlı fiyatla gösteriliyor";
   if (invalid) {
     $("#save-status").textContent = "Hatalı alanları düzeltin (kırmızı çerçeveli)";
     return;
@@ -379,7 +431,8 @@ async function save() {
       config.version = fresh.version;
     }
     $("#save-status").dataset.keep = "1";
-    $("#save-status").textContent = `Kaydedildi (sürüm ${doc.version}). Uygulamalar 2 dakika içinde güncellenir.`;
+    $("#save-status").textContent = `Kaydedildi (sürüm ${doc.version})`;
+    toast("Kaydedildi. Uygulamalar 2 dakika içinde güncellenir.");
     updateDirty();
     delete $("#save-status").dataset.keep;
   } catch (e) {
@@ -388,6 +441,26 @@ async function save() {
     saving = false;
     updateDirty();
   }
+}
+
+function discard() {
+  if (!confirm("Kaydedilmemiş değişiklikler silinsin ve son kaydedilen hâle dönülsün mü?")) return;
+  config = merge(structuredClone(DEFAULTS), JSON.parse(saved));
+  renderProducts();
+  renderFields();
+  renderHours();
+  for (const el of $$("#editor-view input")) el.setCustomValidity("");
+  updateDirty();
+  toast("Değişiklikler geri alındı");
+}
+
+let toastTimer = 0;
+function toast(text) {
+  const el = $("#toast");
+  el.textContent = text;
+  el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; }, 3500);
 }
 
 // ---------- live feed (Socket.IO v4 over a plain WebSocket, see HaremProtocol.kt) ----------
@@ -481,7 +554,17 @@ for (const b of $$("[data-theme-choice]")) {
   });
 }
 $("#save").addEventListener("click", save);
-$("#group-filter").addEventListener("change", renderProducts);
+$("#discard").addEventListener("click", discard);
+$("#product-search").addEventListener("input", (e) => { view.query = e.target.value; renderProducts(); });
+$("#only-changed").addEventListener("change", (e) => { view.onlyChanged = e.target.checked; renderProducts(); });
+$("#toggle-pw").addEventListener("click", () => {
+  const input = $("#password");
+  const show = input.type === "password";
+  input.type = show ? "text" : "password";
+  $("#toggle-pw").textContent = show ? "Gizle" : "Göster";
+  $("#toggle-pw").setAttribute("aria-label", show ? "Şifreyi gizle" : "Şifreyi göster");
+  input.focus();
+});
 $("#add-hours").addEventListener("click", () => {
   config.store.openingHours.push({ days: [6], open: "10:00", close: "17:00" });
   renderHours();

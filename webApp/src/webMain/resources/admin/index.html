@@ -14,10 +14,10 @@
     <link rel="stylesheet" href="admin.css">
 </head>
 <body>
-<main class="admin">
-    <header>
-        <img src="../icons/icon-192.png" width="40" height="40" alt="">
-        <div class="grow">
+<header class="topbar">
+    <div class="topbar-inner">
+        <img src="../icons/icon-192.png" width="36" height="36" alt="">
+        <div class="grow brand">
             <a href="../">Mercan Kuyumculuk</a>
             <div class="muted">Yönetim paneli</div>
         </div>
@@ -26,15 +26,22 @@
             <button type="button" data-theme-choice="light" title="Gündüz modu">☀︎ Gündüz</button>
             <button type="button" data-theme-choice="dark" title="Gece modu">☾ Gece</button>
         </div>
-        <button id="logout" class="ghost" hidden>Çıkış</button>
-    </header>
+        <button id="logout" class="ghost small" hidden>Çıkış</button>
+    </div>
+</header>
+<main class="admin">
 
     <!-- Login -->
     <section id="login-view" hidden>
-        <form id="login-form" class="card narrow">
-            <h1>Giriş</h1>
+        <form id="login-form" class="card narrow login">
+            <img src="../icons/icon-192.png" width="64" height="64" alt="">
+            <h1>Yönetim paneline giriş</h1>
+            <p class="muted">Fiyatları, mağaza bilgilerini ve duyuruyu buradan yönetirsiniz.</p>
             <label for="password">Şifre</label>
-            <input id="password" type="password" autocomplete="current-password" required>
+            <div class="pw">
+                <input id="password" type="password" autocomplete="current-password" required>
+                <button type="button" id="toggle-pw" class="ghost small" aria-label="Şifreyi göster">Göster</button>
+            </div>
             <p id="login-error" class="error" role="alert"></p>
             <button type="submit" class="primary wide">Giriş yap</button>
         </form>
@@ -50,18 +57,23 @@
         </nav>
 
         <div data-panel="prices">
-            <div class="card tip">
-                <strong>Nasıl çalışır?</strong> Her ürün varsayılan olarak Harem Altın'ın canlı fiyatını gösterir.
-                <em>Fark ekle</em> ile canlı fiyata TL veya yüzde ekleyip çıkarabilir, <em>Sabit fiyat</em> ile
-                fiyatı elle yazabilirsiniz. Değişiklikler kaydettikten sonra 2 dakika içinde tüm uygulamalara ulaşır.
+            <details class="card tip">
+                <summary><strong>Nasıl çalışır?</strong> <span id="feed-status" class="pill">Canlı fiyatlar bağlanıyor…</span></summary>
+                <ul>
+                    <li><b>Canlı:</b> Harem Altın fiyatı aynen gösterilir.</li>
+                    <li><b>Fark ekle:</b> Canlı fiyata TL veya yüzde eklenir/çıkarılır. Azaltmak için eksi yazın (örn. <code>-50</code>).</li>
+                    <li><b>Sabit fiyat:</b> Fiyatı elle yazarsınız, canlı fiyat değişse de sabit kalır.</li>
+                    <li><b>Göster</b> kapatılırsa ürün uygulamada görünmez.</li>
+                </ul>
+                <p>Kaydettikten sonra değişiklikler 2 dakika içinde tüm uygulamalara ulaşır.</p>
+            </details>
+            <div class="toolbar">
+                <input id="product-search" type="search" placeholder="Ürün ara (örn. çeyrek)" aria-label="Ürün ara">
+                <label class="check only-changed"><input type="checkbox" id="only-changed"> Sadece özel fiyatlılar</label>
             </div>
-            <div class="row">
-                <span id="feed-status" class="pill">Canlı fiyatlar bağlanıyor…</span>
-                <select id="group-filter" aria-label="Kategori">
-                    <option value="">Tüm ürünler</option>
-                </select>
-            </div>
+            <div id="group-chips" class="chips" role="group" aria-label="Kategori"></div>
             <div id="products"></div>
+            <p id="no-results" class="muted center" hidden>Aramanıza uygun ürün yok.</p>
         </div>
 
         <div data-panel="store" hidden>
@@ -112,9 +124,16 @@
         </div>
 
         <div class="savebar">
-            <span id="save-status" class="muted" role="status"></span>
-            <button id="save" class="primary" disabled>Kaydet</button>
+            <div class="savebar-inner">
+                <div class="grow">
+                    <div id="save-status" class="status" role="status"></div>
+                    <div id="override-count" class="muted small-text"></div>
+                </div>
+                <button id="discard" class="ghost" disabled>Geri al</button>
+                <button id="save" class="primary" disabled>Kaydet</button>
+            </div>
         </div>
+        <div id="toast" class="toast" role="status" hidden></div>
     </section>
 </main>
 <script type="module" src="admin.js"></script>
