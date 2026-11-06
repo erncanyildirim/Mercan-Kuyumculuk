@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -19,6 +20,14 @@ dependencies {
     debugImplementation(libs.compose.uiTooling)
 }
 
+// Upload key for Google Play. Kept outside the repo; path can be overridden with MERCAN_UPLOAD_KEYSTORE_PROPERTIES.
+val uploadKeystoreProps = Properties().apply {
+    val path = System.getenv("MERCAN_UPLOAD_KEYSTORE_PROPERTIES")
+        ?: "${System.getProperty("user.home")}/.mercan-signing/upload-keystore.properties"
+    val file = File(path)
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+
 android {
     namespace = "com.suer.mercankuyumculuk"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -27,16 +36,27 @@ android {
         applicationId = "com.suer.mercankuyumculuk"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    signingConfigs {
+        if (uploadKeystoreProps.isNotEmpty()) {
+            create("upload") {
+                storeFile = File(uploadKeystoreProps.getProperty("storeFile"))
+                storePassword = uploadKeystoreProps.getProperty("storePassword")
+                keyAlias = uploadKeystoreProps.getProperty("keyAlias")
+                keyPassword = uploadKeystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
     buildTypes {
         release {
+            signingConfigs.findByName("upload")?.let { signingConfig = it }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
