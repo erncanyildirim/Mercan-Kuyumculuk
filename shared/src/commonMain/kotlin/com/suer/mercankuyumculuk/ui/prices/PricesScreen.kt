@@ -235,8 +235,6 @@ private fun HeroCard(
                     color = c.goldInk,
                     modifier = Modifier.semantics { heading() },
                 )
-                Spacer(Modifier.width(8.dp))
-                Text("gram · 24 ayar", style = MaterialTheme.typography.bodySmall, color = c.textMuted)
                 Spacer(Modifier.weight(1f))
                 if (quote != null) ChangeChip(quote.changePct)
             }
