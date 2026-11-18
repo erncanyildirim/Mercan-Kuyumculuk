@@ -1,6 +1,8 @@
 // Admin panel for the jeweler: edits the document served at /api/config.
 // Pricing math mirrors PricingEngine in shared/.../data/market/Pricing.kt.
 
+import { ensureSite, initSite, renderSite } from "./admin-site.js";
+
 const TOKEN_KEY = "mercan.admin.token";
 const DAY_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 
@@ -35,6 +37,7 @@ let token = sessionStorage.getItem(TOKEN_KEY);
 let catalog = [];
 let config = structuredClone(DEFAULTS);
 let saved = "";
+let siteReady = false;
 const live = {};
 const view = { group: "", query: "", onlyChanged: false };
 
@@ -131,7 +134,13 @@ async function showEditor() {
   ]);
   catalog = cat.products;
   config = merge(structuredClone(DEFAULTS), doc);
+  ensureSite(config);
   saved = normalized(config);
+  if (!siteReady) {
+    siteReady = true;
+    initSite({ getConfig: () => config, onChange: updateDirty, getToken: () => token, catalog, toast });
+  }
+  renderSite();
   renderGroupChips();
   renderProducts();
   renderFields();
@@ -420,9 +429,11 @@ async function save() {
   try {
     const doc = await api("/api/admin/config", { method: "PUT", body: JSON.stringify(config) });
     const fresh = merge(structuredClone(DEFAULTS), doc);
+    ensureSite(fresh);
     saved = normalized(fresh);
     if (normalized(config) === sent) {
       config = fresh;
+      renderSite();
       renderProducts();
       renderFields();
       renderHours();
@@ -446,6 +457,8 @@ async function save() {
 function discard() {
   if (!confirm("Kaydedilmemiş değişiklikler silinsin ve son kaydedilen hâle dönülsün mü?")) return;
   config = merge(structuredClone(DEFAULTS), JSON.parse(saved));
+  ensureSite(config);
+  renderSite();
   renderProducts();
   renderFields();
   renderHours();

@@ -118,7 +118,9 @@ export function sanitizeConfig(input) {
     if (!isDefault) products[code] = entry;
   }
 
-  return { schema: 1, feed, store, announcement, products };
+  const doc = { schema: 1, feed, store, announcement, products };
+  if (input.site != null) doc.site = sanitizeSite(input.site);
+  return doc;
 }
 
 export async function readConfig(env) {
@@ -145,4 +147,87 @@ export function json(body, init = {}) {
   const headers = new Headers(init.headers);
   headers.set("Content-Type", "application/json; charset=utf-8");
   return new Response(JSON.stringify(body), { ...init, headers });
+}
+
+// ---------- website content (home page, categories, products, TV board, story card) ----------
+
+const ID = /^[a-z0-9-]{1,40}$/;
+const MEDIA_ID = /^[a-f0-9]{32}$/;
+const ICONS = new Set(["bangle", "twist", "chain", "coin", "bar", "ring", "gem", "heart", "necklace", "earring"]);
+
+function list(value, max, field) {
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value)) throw new ValidationError(`${field} liste olmalı`);
+  if (value.length > max) throw new ValidationError(`${field} en fazla ${max} öğe olabilir`);
+  return value;
+}
+
+function id(value, field) {
+  const s = str(value, 40, field);
+  if (!ID.test(s)) throw new ValidationError(`${field} geçersiz`);
+  return s;
+}
+
+function media(value, field) {
+  const s = str(value, 32, field);
+  if (s && !MEDIA_ID.test(s)) throw new ValidationError(`${field} geçersiz`);
+  return s;
+}
+
+function priceTiles(value, max, field, withNote) {
+  return list(value, max, field).map((t, i) => {
+    const code = str(t?.code, 24, `${field} ${i + 1} ürün kodu`);
+    if (!CODE.test(code)) throw new ValidationError(`${field} ${i + 1}: ürün seçin`);
+    const tile = { code, label: str(t?.label, 20, `${field} ${i + 1} başlık`) || code };
+    if (withNote) tile.note = str(t?.note, 30, `${field} ${i + 1} açıklama`);
+    return tile;
+  });
+}
+
+/** Website content edited in the admin panel's "Web sitesi" tab. */
+export function sanitizeSite(input) {
+  if (typeof input !== "object" || Array.isArray(input)) throw new ValidationError("Site ayarları geçersiz");
+  const h = input.hero ?? {};
+  const a = input.about ?? {};
+  const categories = list(input.categories, 40, "Kategoriler").map((c, i) => ({
+    id: id(c?.id, `Kategori ${i + 1}`),
+    title: str(c?.title, 40, `Kategori ${i + 1} adı`) || `Kategori ${i + 1}`,
+    subtitle: str(c?.subtitle, 80, `Kategori ${i + 1} açıklaması`),
+    visible: bool(c?.visible, true),
+    // Shown in the bangle bar under the site header.
+    inBar: bool(c?.inBar, false),
+    image: media(c?.image, `Kategori ${i + 1} fotoğrafı`),
+    icon: ICONS.has(c?.icon) ? c.icon : "",
+  }));
+  const ids = new Set(categories.map((c) => c.id));
+  if (ids.size !== categories.length) throw new ValidationError("Aynı kategori iki kez eklenmiş");
+  const items = list(input.items, 300, "Ürünler").map((p, i) => {
+    const categoryId = str(p?.categoryId, 40, `Ürün ${i + 1} kategorisi`);
+    if (!ids.has(categoryId)) throw new ValidationError(`Ürün ${i + 1}: kategorisi silinmiş, yeni kategori seçin`);
+    return {
+      id: id(p?.id, `Ürün ${i + 1}`),
+      categoryId,
+      name: str(p?.name, 60, `Ürün ${i + 1} adı`) || `Ürün ${i + 1}`,
+      detail: str(p?.detail, 60, `Ürün ${i + 1} ayar/gram`),
+      description: str(p?.description, 400, `Ürün ${i + 1} açıklaması`),
+      image: media(p?.image, `Ürün ${i + 1} fotoğrafı`),
+      visible: bool(p?.visible, true),
+    };
+  });
+  return {
+    hero: {
+      eyebrow: str(h.eyebrow, 40, "Üst başlık"),
+      title: str(h.title, 80, "Ana başlık"),
+      lead: str(h.lead, 400, "Giriş metni"),
+    },
+    about: {
+      title: str(a.title, 80, "Hakkımızda başlığı"),
+      text: str(a.text, 800, "Hakkımızda metni"),
+      quote: str(a.quote, 300, "Alıntı"),
+    },
+    categories,
+    items,
+    tv: priceTiles(input.tv, 12, "TV kutusu", false),
+    story: priceTiles(input.story, 8, "Story satırı", true),
+  };
 }

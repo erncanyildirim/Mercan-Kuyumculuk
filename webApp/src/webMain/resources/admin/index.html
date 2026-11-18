@@ -51,6 +51,7 @@
     <section id="editor-view" hidden>
         <nav class="tabs" role="tablist">
             <button role="tab" data-tab="prices" aria-selected="true">Fiyatlar</button>
+            <button role="tab" data-tab="site" aria-selected="false">Web sitesi</button>
             <button role="tab" data-tab="store" aria-selected="false">Mağaza</button>
             <button role="tab" data-tab="announcement" aria-selected="false">Duyuru</button>
             <button role="tab" data-tab="advanced" aria-selected="false">Gelişmiş</button>
@@ -74,6 +75,56 @@
             <div id="group-chips" class="chips" role="group" aria-label="Kategori"></div>
             <div id="products"></div>
             <p id="no-results" class="muted center" hidden>Aramanıza uygun ürün yok.</p>
+        </div>
+
+        <div data-panel="site" hidden>
+            <div class="card tip">
+                <strong>Sayfalar:</strong>
+                <a href="/" target="_blank" rel="noopener">Ana sayfa</a> ·
+                <a href="/koleksiyon/" target="_blank" rel="noopener">Koleksiyon</a> ·
+                <a href="/fiyatlar/" target="_blank" rel="noopener">Fiyatlar</a> ·
+                <a href="/tv/" target="_blank" rel="noopener">TV ekranı</a> ·
+                <a href="/story/" target="_blank" rel="noopener">Story</a>
+                <p class="muted small-text" style="margin: 6px 0 0;">Sitedeki, TV ekranındaki ve Story’deki fiyatlar “Fiyatlar” sekmesindeki ayarlarınızla hesaplanır. Değişiklikler Kaydet’e bastıktan sonra görünür.</p>
+            </div>
+
+            <div class="card form">
+                <h2>Ana sayfa metinleri</h2>
+                <label>Üst başlık <input data-field="site.hero.eyebrow" maxlength="40" placeholder="Osmaniye · Atatürk Caddesi"></label>
+                <label>Ana başlık <input data-field="site.hero.title" maxlength="80" placeholder="Altının ışığı, Mercan’ın imzası"></label>
+                <p class="muted">Başlığın son kelimesi altın renkte ve italik görünür.</p>
+                <label>Giriş metni <textarea data-field="site.hero.lead" rows="3" maxlength="400"></textarea></label>
+                <label>Hakkımızda başlığı <input data-field="site.about.title" maxlength="80"></label>
+                <label>Hakkımızda metni <textarea data-field="site.about.text" rows="4" maxlength="800"></textarea></label>
+                <label>Alıntı (boş bırakılırsa gizlenir) <textarea data-field="site.about.quote" rows="2" maxlength="300"></textarea></label>
+            </div>
+
+            <div class="card form">
+                <div class="card-head"><h2>Kategoriler</h2><button type="button" id="add-category" class="ghost small">+ Kategori ekle</button></div>
+                <p class="muted">Menüdeki ve ana sayfadaki koleksiyon kartları. “Bilezik çubuğunda” işaretli olanlar sitenin üstündeki bilezik çeşitleri çubuğunda görünür. İlk kategori ana sayfada büyük kart olur.</p>
+                <div id="categories" class="list"></div>
+            </div>
+
+            <div class="card form">
+                <div class="card-head">
+                    <h2>Ürünler <span id="item-count" class="muted small-text"></span></h2>
+                    <button type="button" id="add-item" class="ghost small">+ Ürün ekle</button>
+                </div>
+                <label>Kategoriye göre göster <select id="item-filter"></select></label>
+                <div id="items" class="items-admin"></div>
+            </div>
+
+            <div class="card form">
+                <div class="card-head"><h2>TV ekranı</h2><button type="button" id="add-tv" class="ghost small">+ Kutu ekle</button></div>
+                <p class="muted">Mağazadaki televizyonda görünecek fiyatlar (en fazla 12). İlk kutu büyük gösterilir. TV’de <b>/tv/</b> adresini açıp tam ekran yapın.</p>
+                <div id="tv-rows" class="list"></div>
+            </div>
+
+            <div class="card form">
+                <div class="card-head"><h2>Story ekranı</h2><button type="button" id="add-story" class="ghost small">+ Satır ekle</button></div>
+                <p class="muted">Instagram story görseli (en fazla 8 satır). <b>/story/</b> sayfasından PNG olarak indirip paylaşabilirsiniz.</p>
+                <div id="story-rows" class="list"></div>
+            </div>
         </div>
 
         <div data-panel="store" hidden>

@@ -10,7 +10,8 @@ export async function onRequestGet({ request, env }) {
   return json((await readConfig(env)) ?? { schema: 1, version: 0 }, { headers: NO_STORE });
 }
 
-export async function onRequestPut({ request, env }) {
+export async function onRequestPut(context) {
+  const { request, env } = context;
   const denied = await requireAdmin(request, env);
   if (denied) return denied;
   if (!isJson(request)) return json({ error: "Geçersiz istek" }, { status: 415 });
@@ -27,9 +28,39 @@ export async function onRequestPut({ request, env }) {
   }
   try {
     const doc = await writeConfig(env, sanitizeConfig(body), previous);
+    // Free KV space: photos no longer used by any category or product are deleted.
+    context.waitUntil?.(deleteUnusedMedia(env, previous, doc));
     return json(doc, { headers: NO_STORE });
   } catch (e) {
     if (e instanceof ValidationError) return json({ error: e.message }, { status: 422 });
     throw e;
+  }
+}
+
+// Photos uploaded but not saved yet stay this long, so an upload is not lost while the admin is still editing.
+const UNSAVED_GRACE_MS = 6 * 60 * 60 * 1000;
+
+function imagesOf(doc) {
+  const site = doc?.site ?? {};
+  return new Set([...(site.items ?? []), ...(site.categories ?? [])].map((p) => p.image).filter(Boolean));
+}
+
+async function deleteUnusedMedia(env, previous, doc) {
+  try {
+    const used = imagesOf(doc);
+    const doomed = new Set([...imagesOf(previous)].filter((id) => !used.has(id)));
+    let cursor;
+    do {
+      const page = await env.CONFIG.list({ prefix: "media:", cursor });
+      for (const key of page.keys) {
+        const id = key.name.slice("media:".length);
+        const at = Date.parse(key.metadata?.at || "") || 0;
+        if (!used.has(id) && Date.now() - at > UNSAVED_GRACE_MS) doomed.add(id);
+      }
+      cursor = page.list_complete ? undefined : page.cursor;
+    } while (cursor);
+    await Promise.all([...doomed].map((id) => env.CONFIG.delete(`media:${id}`)));
+  } catch {
+    // Cleanup is best effort; the next save tries again.
   }
 }

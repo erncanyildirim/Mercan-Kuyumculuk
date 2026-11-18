@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Canlı Altın ve Döviz Fiyatları · Mercan Kuyumculuk Osmaniye</title>
+    <meta name="description" content="Has altın, gram altın, 22 ayar bilezik, çeyrek, yarım, tam altın, dolar ve euro fiyatları anlık. Mercan Kuyumculuk Osmaniye.">
+    <meta name="theme-color" content="#0b0a08">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<div id="chrome-top"></div>
+<main class="wrap" style="padding-bottom:80px">
+    <div class="page-hero">
+        <span class="eyebrow">Canlı piyasa</span>
+        <h1>Güncel <em class="gold-text">fiyatlar</em></h1>
+        <p>Altın, sarrafiye, döviz ve emtia fiyatları saniyeler içinde güncellenir. Fiyatlar bilgi amaçlıdır; kesin fiyat için mağazamıza danışın.</p>
+    </div>
+    <div class="board" data-board>
+        <div class="board-top">
+            <div class="tabs" role="tablist" data-tabs></div>
+            <div class="status"><span class="dot off" data-live-dot></span><span data-status>Bağlanıyor…</span></div>
+        </div>
+        <table class="ptable">
+            <thead><tr><th>Ürün</th><th>Alış</th><th>Satış</th><th class="col-chg">Değişim</th></tr></thead>
+            <tbody data-rows></tbody>
+        </table>
+        <div class="board-foot"><span>Kaynak: Harem Altın · mağaza fiyatları uygulanmıştır</span><span data-updated></span></div>
+    </div>
+</main>
+<div id="chrome-bottom"></div>
+<script type="module">
+    import { istanbulNow, loadCatalog, loadConfig, startLive } from "/assets/live.js";
+    import { siteContent } from "/assets/site-defaults.js";
+    import { initChrome, setLiveDot, updateTicker } from "/assets/chrome.js";
+    import { createBoard } from "/assets/board.js";
+
+    const [config, catalog] = await Promise.all([loadConfig(), loadCatalog()]);
+    initChrome({ config, site: siteContent(config), current: "prices" });
+    const board = createBoard(document.querySelector("[data-board]"), catalog);
+    const status = document.querySelector("[data-status]");
+    const updated = document.querySelector("[data-updated]");
+    startLive({
+        config,
+        onStatus(s) { setLiveDot(s); status.textContent = s === "live" ? "Canlı" : s === "offline" ? "Bağlantı bekleniyor" : "Bağlanıyor…"; },
+        onUpdate(q) {
+            updateTicker(q, catalog);
+            board.update(q);
+            const d = istanbulNow().date;
+            updated.textContent = `Son güncelleme ${[d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()].map((n) => String(n).padStart(2, "0")).join(":")}`;
+        },
+    });
+</script>
+</body>
+</html>
