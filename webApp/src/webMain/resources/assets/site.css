@@ -29,6 +29,8 @@
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.65 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 img { max-width: 100%; display: block; }
+/* Icons carry width/height attributes as a fallback; with CSS the width rules below drive the size. */
+svg { height: auto; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; cursor: pointer; }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 6px; }
@@ -124,7 +126,11 @@ em.gold { font-style: italic; color: var(--gold); }
 .today { background: var(--card); border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow); padding: 28px 30px 22px; }
 .today-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
 .today-head h2 { margin: 0; font: 500 28px/1 var(--serif); }
-.today-head span { font-size: 12px; color: var(--muted); }
+.live-pill { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; background: #eef7f0; color: var(--up); font: 600 12px/1 var(--sans); letter-spacing: .04em; white-space: nowrap; }
+.live-pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--up); box-shadow: 0 0 0 0 rgba(21, 128, 61, .5); animation: livePulse 2s infinite; }
+.live-pill.off { background: var(--paper-2); color: var(--muted); }
+.live-pill.off i { background: var(--muted); animation: none; }
+@keyframes livePulse { 70% { box-shadow: 0 0 0 7px rgba(21, 128, 61, 0); } 100% { box-shadow: 0 0 0 0 rgba(21, 128, 61, 0); } }
 .today-cols { display: grid; grid-template-columns: 1fr 104px 104px; gap: 8px; font: 600 10.5px/1 var(--sans); letter-spacing: .18em; color: var(--muted); text-transform: uppercase; padding: 16px 0 6px; text-align: right; }
 .today-cols span:first-child { text-align: left; }
 .today-row { display: grid; grid-template-columns: 1fr 104px 104px; gap: 8px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); text-align: right; }

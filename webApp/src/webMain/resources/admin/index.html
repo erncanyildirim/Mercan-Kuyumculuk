@@ -7,10 +7,7 @@
     <title>Yönetim Paneli · Mercan Kuyumculuk</title>
     <meta name="theme-color" content="#0A0A0B">
     <link rel="icon" href="../favicon.ico" sizes="any">
-    <script>
-        try { const t = localStorage.getItem("mercan.admin.theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
-    </script>
-    <link rel="stylesheet" href="../page.css">
+    <link rel="stylesheet" href="../page.css?v=202611182247">
     <link rel="stylesheet" href="admin.css">
 </head>
 <body>
@@ -20,11 +17,6 @@
         <div class="grow brand">
             <a href="../">Mercan Kuyumculuk</a>
             <div class="muted">Yönetim paneli</div>
-        </div>
-        <div class="seg theme-switch" role="group" aria-label="Görünüm">
-            <button type="button" data-theme-choice="system" title="Sistem ayarına göre">Sistem</button>
-            <button type="button" data-theme-choice="light" title="Gündüz modu">☀︎ Gündüz</button>
-            <button type="button" data-theme-choice="dark" title="Gece modu">☾ Gece</button>
         </div>
         <button id="logout" class="ghost small" hidden>Çıkış</button>
     </div>
@@ -88,7 +80,15 @@
                 <p class="muted small-text" style="margin: 6px 0 0;">Sitedeki, TV ekranındaki ve Story’deki fiyatlar “Fiyatlar” sekmesindeki ayarlarınızla hesaplanır. Değişiklikler Kaydet’e bastıktan sonra görünür.</p>
             </div>
 
-            <div class="card form">
+            <nav class="subtabs" role="tablist" aria-label="Web sitesi bölümleri">
+                <button type="button" role="tab" data-sub="texts" aria-selected="true">Ana sayfa metinleri</button>
+                <button type="button" role="tab" data-sub="categories" aria-selected="false">Kategoriler<span class="count" data-count="categories"></span></button>
+                <button type="button" role="tab" data-sub="items" aria-selected="false">Ürünler<span class="count" data-count="items"></span></button>
+                <button type="button" role="tab" data-sub="tv" aria-selected="false">TV ekranı</button>
+                <button type="button" role="tab" data-sub="story" aria-selected="false">Story</button>
+            </nav>
+
+            <div class="card form" data-site-section="texts">
                 <h2>Ana sayfa metinleri</h2>
                 <label>Üst başlık <input data-field="site.hero.eyebrow" maxlength="40" placeholder="Osmaniye · Atatürk Caddesi"></label>
                 <label>Ana başlık <input data-field="site.hero.title" maxlength="80" placeholder="Altının ışığı, Mercan’ın imzası"></label>
@@ -99,13 +99,13 @@
                 <label>Alıntı (boş bırakılırsa gizlenir) <textarea data-field="site.about.quote" rows="2" maxlength="300"></textarea></label>
             </div>
 
-            <div class="card form">
+            <div class="card form" data-site-section="categories" hidden>
                 <div class="card-head"><h2>Kategoriler</h2><button type="button" id="add-category" class="ghost small">+ Kategori ekle</button></div>
                 <p class="muted">Menüdeki ve ana sayfadaki koleksiyon kartları. “Bilezik çubuğunda” işaretli olanlar sitenin üstündeki bilezik çeşitleri çubuğunda görünür. İlk kategori ana sayfada büyük kart olur.</p>
                 <div id="categories" class="list"></div>
             </div>
 
-            <div class="card form">
+            <div class="card form" data-site-section="items" hidden>
                 <div class="card-head">
                     <h2>Ürünler <span id="item-count" class="muted small-text"></span></h2>
                     <button type="button" id="add-item" class="ghost small">+ Ürün ekle</button>
@@ -114,13 +114,13 @@
                 <div id="items" class="items-admin"></div>
             </div>
 
-            <div class="card form">
+            <div class="card form" data-site-section="tv" hidden>
                 <div class="card-head"><h2>TV ekranı</h2><button type="button" id="add-tv" class="ghost small">+ Kutu ekle</button></div>
                 <p class="muted">Mağazadaki televizyonda görünecek fiyatlar (en fazla 12). İlk kutu büyük gösterilir. TV’de <b>/tv/</b> adresini açıp tam ekran yapın.</p>
                 <div id="tv-rows" class="list"></div>
             </div>
 
-            <div class="card form">
+            <div class="card form" data-site-section="story" hidden>
                 <div class="card-head"><h2>Story ekranı</h2><button type="button" id="add-story" class="ghost small">+ Satır ekle</button></div>
                 <p class="muted">Instagram story görseli (en fazla 8 satır). <b>/story/</b> sayfasından PNG olarak indirip paylaşabilirsiniz.</p>
                 <div id="story-rows" class="list"></div>

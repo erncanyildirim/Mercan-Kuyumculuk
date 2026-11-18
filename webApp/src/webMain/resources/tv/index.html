@@ -4,189 +4,307 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
+    <meta name="color-scheme" content="light">
     <title>Mağaza Ekranı · Mercan Kuyumculuk</title>
-    <meta name="theme-color" content="#0b0a08">
+    <meta name="theme-color" content="#faf8f4">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Montserrat:wght@500;600;700&display=swap">
     <style>
-        :root {
-            --onyx: #0b0a08; --ivory: #f4ede0; --mute: rgba(244, 237, 224, .55); --gold: #e6bf55; --gold-hi: #fbe7a1;
-            --line: rgba(232, 200, 120, .22); --up: #6fd39a; --down: #ff7a6b; --coral: #ef7f63;
-            --grad: linear-gradient(115deg, #8a6417 0%, #e6bf55 28%, #fff1b8 46%, #e2b443 62%, #8f6a1a 100%);
-            /* everything scales with the screen: 1vmin-based unit on a 16:9 stage */
-            --u: min(1vw, 1.7778vh);
-        }
-        * { box-sizing: border-box; font-variant-numeric: lining-nums tabular-nums !important; }
-        html, body { margin: 0; height: 100%; background: var(--onyx); color: var(--ivory); font-family: Manrope, system-ui, sans-serif; overflow: hidden; cursor: none; }
-        body { display: grid; place-items: center; }
-        .stage {
-            width: calc(var(--u) * 100); height: calc(var(--u) * 56.25); position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr);
-            padding: calc(var(--u) * 2.2) calc(var(--u) * 2.6) calc(var(--u) * 1.2); gap: calc(var(--u) * 1.6); isolation: isolate; overflow: hidden;
-        }
-        .stage::before {
-            content: ""; position: absolute; z-index: -1; width: 70%; aspect-ratio: 1; right: -18%; top: -40%; border-radius: 50%;
-            background: radial-gradient(closest-side, rgba(230, 191, 85, .18), rgba(239, 127, 99, .05) 60%, transparent 72%);
-            animation: drift 18s ease-in-out infinite alternate;
-        }
-        .stage::after {
-            content: ""; position: absolute; z-index: -1; width: 60%; aspect-ratio: 1; left: -20%; bottom: -50%; border-radius: 50%;
-            background: radial-gradient(closest-side, rgba(230, 191, 85, .1), transparent 70%);
-        }
-        @keyframes drift { to { transform: translate(-6%, 8%) scale(1.1); } }
-        header { display: flex; align-items: center; gap: calc(var(--u) * 1.6); }
-        header img { width: calc(var(--u) * 6.4); filter: drop-shadow(0 0 calc(var(--u) * 1.4) rgba(249, 222, 20, .35)); }
-        .brand { font: 600 calc(var(--u) * 3.4)/1 "Cormorant Garamond", serif; }
-        .brand small { display: block; font: 700 calc(var(--u) * .9)/1 Manrope, sans-serif; letter-spacing: .4em; color: var(--gold); margin-top: calc(var(--u) * .6); }
+        /*
+         * Store TV board. Written for TV browsers (Samsung Tizen, LG webOS, Android TV, TV sticks):
+         * plain script without modules or new syntax, sizes computed in script (no CSS min()/clamp()),
+         * a safe margin for TVs that crop the picture edges (overscan), and a slow drift against burn-in.
+         */
+        html, body { margin: 0; height: 100%; overflow: hidden; background: #faf8f4; color: #1c1917; cursor: none; }
+        body { font-family: Montserrat, "Segoe UI", Roboto, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+        * { box-sizing: border-box; font-variant-numeric: lining-nums tabular-nums; }
+        .stage { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; transition: transform 2s ease; }
+        header { display: flex; align-items: center; }
+        header img { display: block; }
+        .brand { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; line-height: 1; }
+        .brand small { display: block; font-family: Montserrat, Arial, sans-serif; font-weight: 700; letter-spacing: .38em; color: #9a7414; }
         .clock { margin-left: auto; text-align: right; }
-        .clock b { display: block; font: 600 calc(var(--u) * 3.6)/1 "Cormorant Garamond", serif; font-variant-numeric: lining-nums tabular-nums; }
-        .clock span { font-size: calc(var(--u) * 1.1); letter-spacing: .14em; color: var(--mute); text-transform: uppercase; font-weight: 700; }
-        .live { display: flex; align-items: center; gap: calc(var(--u) * .7); padding: calc(var(--u) * .7) calc(var(--u) * 1.2); border-radius: 999px; border: 1px solid var(--line); font-weight: 800; font-size: calc(var(--u) * 1); letter-spacing: .2em; color: var(--gold); }
-        .dot { width: calc(var(--u) * .8); height: calc(var(--u) * .8); border-radius: 50%; background: var(--up); animation: pulse 2s infinite; }
-        .dot.off { background: var(--down); animation: none; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(111, 211, 154, .7); } 70%, 100% { box-shadow: 0 0 0 calc(var(--u) * 1) rgba(111, 211, 154, 0); } }
-
-        .grid { display: grid; gap: calc(var(--u) * 1.1); grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr)); grid-template-rows: repeat(var(--rows, 3), minmax(0, 1fr)); min-height: 0; }
-        .tile {
-            position: relative; border-radius: calc(var(--u) * 1.6); border: 1px solid var(--line); overflow: hidden;
-            background: linear-gradient(160deg, rgba(36, 31, 22, .92), rgba(16, 14, 10, .95));
-            padding: calc(var(--u) * 1.4) calc(var(--u) * 1.6); display: flex; flex-direction: column; justify-content: space-between; min-height: 0;
-            opacity: 0; transform: translateY(calc(var(--u) * 2)); animation: in .9s cubic-bezier(.2,.7,.1,1) forwards;
-        }
-        .tile::after {
-            content: ""; position: absolute; inset: 0; pointer-events: none; transform: translateX(-130%);
-            background: linear-gradient(100deg, transparent 35%, rgba(255, 240, 190, .09) 50%, transparent 65%);
-            animation: sweep 9s ease-in-out infinite; animation-delay: var(--d, 0s);
-        }
-        @keyframes sweep { 0%, 70% { transform: translateX(-130%); } 100% { transform: translateX(130%); } }
-        @keyframes in { to { opacity: 1; transform: none; } }
-        .tile.hero { grid-column: span 2; grid-row: 1 / -1; border-color: rgba(232, 200, 120, .45); background: radial-gradient(120% 100% at 100% 0%, rgba(230, 191, 85, .18), transparent 55%), linear-gradient(160deg, #2a2316, #120f0a); }
-        .label { font: 800 calc(var(--u) * 1.45)/1 Manrope, sans-serif; letter-spacing: .12em; color: var(--gold); display: flex; justify-content: space-between; align-items: center; gap: calc(var(--u) * 1); }
-        .hero .label { font-size: calc(var(--u) * 2.1); }
-        .chg { font-size: calc(var(--u) * 1.15); letter-spacing: .02em; font-weight: 800; padding: calc(var(--u) * .35) calc(var(--u) * .7); border-radius: 999px; background: rgba(255, 255, 255, .05); }
-        .up { color: var(--up); } .down { color: var(--down); }
-        .sell { font: 600 calc(var(--u) * var(--fs, 4.2))/1 "Cormorant Garamond", serif; font-variant-numeric: lining-nums tabular-nums; white-space: nowrap; transition: color .6s; }
-        .hero .sell { font-size: calc(var(--u) * 9); background: var(--grad); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: sheen 6s ease-in-out infinite; }
-        @keyframes sheen { 50% { background-position: 100% 0; } }
-        .hero .sell.flash-up, .hero .sell.flash-down { -webkit-text-fill-color: currentColor; }
-        .sell small { font-size: .45em; margin-left: .15em; color: var(--mute); }
-        .buy { font-size: calc(var(--u) * 1.3); color: var(--mute); font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
-        .buy b { color: var(--ivory); font-weight: 700; }
-        .hero .buy { font-size: calc(var(--u) * 1.9); }
-        .side { display: flex; justify-content: space-between; align-items: end; gap: calc(var(--u) * 1); }
-        .hero .meta { font-size: calc(var(--u) * 1.2); color: var(--mute); font-weight: 600; letter-spacing: .06em; }
-        .flash-up { animation: fu 1.6s ease-out; } .flash-down { animation: fd 1.6s ease-out; }
-        @keyframes fu { 0% { color: var(--up); text-shadow: 0 0 calc(var(--u) * 2) rgba(111, 211, 154, .8); } }
-        @keyframes fd { 0% { color: var(--down); text-shadow: 0 0 calc(var(--u) * 2) rgba(255, 122, 107, .8); } }
-
-        footer { display: flex; align-items: center; gap: calc(var(--u) * 1.6); border-top: 1px solid var(--line); padding-top: calc(var(--u) * 1); font-size: calc(var(--u) * 1.15); color: var(--mute); font-weight: 600; }
-        footer .marquee { flex: 1; overflow: hidden; white-space: nowrap; mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
-        footer .marquee > div { display: inline-flex; gap: calc(var(--u) * 4); animation: mq 40s linear infinite; padding-left: 100%; }
-        footer .marquee span::before { content: "✦"; color: var(--coral); margin-right: calc(var(--u) * 1.2); }
-        @keyframes mq { to { transform: translateX(-100%); } }
-        footer b { color: var(--gold); }
-        .note { position: fixed; inset: auto 0 0; text-align: center; font-size: 12px; color: var(--mute); padding: 6px; opacity: 0; transition: opacity .4s; cursor: default; }
-        body:hover .note { opacity: 1; }
+        .clock b { display: block; font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; line-height: 1; }
+        .clock span { color: #6b645c; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+        .grid { flex: 1; display: grid; }
+        .tile { position: relative; background: #fff; border: 1px solid #e7e0d4; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; box-shadow: 0 1px 2px rgba(28, 25, 23, .04), 0 10px 28px -14px rgba(28, 25, 23, .18); }
+        .tile::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, #c9a24a, #9a7414); }
+        .label { display: flex; justify-content: space-between; align-items: center; font-weight: 700; letter-spacing: .1em; color: #9a7414; white-space: nowrap; }
+        .chg { font-weight: 700; letter-spacing: 0; border-radius: 999px; }
+        .up { color: #15803d; background: rgba(21, 128, 61, .08); }
+        .down { color: #b91c1c; background: rgba(185, 28, 28, .07); }
+        .sell { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; line-height: 1; white-space: nowrap; color: #1c1917; transition: color .8s; }
+        .sell small { color: #6b645c; margin-left: .12em; font-size: .5em; }
+        .buy { color: #6b645c; font-weight: 600; white-space: nowrap; }
+        .buy b { color: #1c1917; }
+        .flash-up { color: #15803d; }
+        .flash-down { color: #b91c1c; }
+        footer { display: flex; align-items: center; color: #6b645c; font-weight: 600; border-top: 1px solid #e7e0d4; white-space: nowrap; overflow: hidden; }
+        footer b { color: #9a7414; }
+        .stale { color: #b91c1c; }
+        .msg { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font: 600 13px Arial, sans-serif; color: #6b645c; padding: 6px; opacity: 0; transition: opacity .4s; cursor: default; }
+        body:hover .msg { opacity: 1; }
     </style>
 </head>
 <body>
-<div class="stage">
-    <header>
-        <img src="/assets/mark.svg" alt="">
-        <div class="brand">Mercan<small>KUYUMCULUK · OSMANİYE</small></div>
-        <div class="live"><span class="dot off" id="dot"></span><span id="live">BAĞLANIYOR</span></div>
+<div class="stage" id="stage">
+    <header id="head">
+        <img src="/assets/mark-dark.svg" alt="" id="logo" width="54" height="42">
+        <div class="brand" id="brand">Mercan<small id="brandSub">KUYUMCULUK · OSMANİYE</small></div>
         <div class="clock"><b id="time">--:--</b><span id="date"></span></div>
     </header>
     <main class="grid" id="grid"></main>
-    <footer>
-        <div>Fiyatlar <b>satış</b> fiyatıdır · alış fiyatları altta</div>
-        <div class="marquee"><div id="marquee"></div></div>
-        <div>Bilgi: <b id="phone"></b></div>
+    <footer id="foot">
+        <span>Fiyatlar <b>satış</b> fiyatıdır · alış fiyatları altta</span>
+        <span id="state" style="margin-left:auto"></span>
+        <span style="margin-left:2em">Bilgi: <b id="phone"></b></span>
     </footer>
 </div>
-<div class="note">Tam ekran için F11 · Ekran kendini otomatik günceller</div>
-<script type="module">
-    import { DAY_LONG, esc, fmt, fmtPct, formatPhone, istanbulNow, loadCatalog, loadConfig, siteDecimals, startLive } from "/assets/live.js";
-    import { siteContent } from "/assets/site-defaults.js";
-
-    const [config, catalog] = await Promise.all([loadConfig(), loadCatalog()]);
-    const tiles = siteContent(config).tv;
-    const grid = document.getElementById("grid");
-    document.getElementById("phone").textContent = formatPhone(config.store.phone);
-
-    // Layout: the first tile is a tall "hero" box two columns wide; the others fill the remaining columns.
-    const others = Math.max(0, tiles.length - 1);
-    const rows = others <= 2 ? Math.max(1, others) : others <= 6 ? 2 : 3;
-    const cols = 2 + Math.max(1, Math.ceil(others / rows));
-    grid.style.setProperty("--cols", cols);
-    grid.style.setProperty("--rows", rows);
-    grid.style.setProperty("--fs", cols >= 6 ? 3.4 : cols === 5 ? 4 : 4.8);
-    grid.innerHTML = tiles.map((t, i) => `
-        <div class="tile ${i === 0 ? "hero" : ""}" data-code="${esc(t.code)}" style="animation-delay:${i * 70}ms;--d:${i * .6}s">
-            <div class="label"><span>${esc(t.label)}</span><span class="chg" data-c></span></div>
-            <div class="sell" data-s>—</div>
-            <div class="side"><div class="buy">Alış <b data-b>—</b></div>${i === 0 ? '<div class="meta" data-t></div>' : ""}</div>
-        </div>`).join("");
-    // Stretch the last box over any empty cells of the last row.
-    const empty = rows * (cols - 2) - others;
-    if (empty > 0 && grid.lastElementChild && others) grid.lastElementChild.style.gridColumn = `span ${empty + 1}`;
-
-    const words = [
-        "Mercan Kuyumculuk’a hoş geldiniz",
-        "Ajda · Burma · Şarnel · Ankara · Ray bilezik çeşitleri",
-        "Ziynet altınında güncel fiyat",
-        "Altınınızı değerinde alıyoruz",
-        "Fiyatlar anlık olarak güncellenir",
+<div class="msg">Tam ekran için ekrana tıklayın ya da F11 · Ekran kendini otomatik günceller</div>
+<script>
+(function () {
+    "use strict";
+    var FEED = "wss://hrmsocketonly.haremaltin.com";
+    var DEFAULT_TILES = [
+        { code: "ALTIN", label: "HAS ALTIN" }, { code: "AYAR22", label: "22 AYAR" }, { code: "KULCEALTIN", label: "GRAM" },
+        { code: "CEYREK_YENI", label: "ÇEYREK" }, { code: "YARIM_YENI", label: "YARIM" }, { code: "TEK_YENI", label: "TAM" },
+        { code: "ATA_YENI", label: "ATA" }, { code: "AYAR14", label: "14 AYAR" }, { code: "USDTRY", label: "DOLAR" }, { code: "EURTRY", label: "EURO" }
     ];
-    if (config.announcement?.enabled && config.announcement.text) words.unshift(config.announcement.text);
-    document.getElementById("marquee").innerHTML = words.map((w) => `<span>${esc(w)}</span>`).join("");
+    var DAYS = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
+    var MONTHS = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 
-    const flash = (el, dir) => { el.classList.remove("flash-up", "flash-down"); void el.offsetWidth; el.classList.add(dir === "up" ? "flash-up" : "flash-down"); };
+    var config = { products: {}, store: { phone: "+905436118088" }, feed: { url: FEED, enabled: true } };
+    var catalog = {};
+    var tiles = DEFAULT_TILES;
+    var raw = {};
+    var shown = {};
+    var lastData = 0;
+    var els = [];
 
-    startLive({
-        config,
-        onStatus(s) {
-            document.getElementById("dot").classList.toggle("off", s !== "live");
-            document.getElementById("live").textContent = s === "live" ? "CANLI" : "BAĞLANIYOR";
-        },
-        onUpdate(quotes) {
-            for (const tile of grid.children) {
-                const q = quotes.get(tile.dataset.code);
-                if (!q) continue;
-                const p = catalog.get(tile.dataset.code);
-                const d = siteDecimals(p);
-                const s = tile.querySelector("[data-s]");
-                const text = q.sell == null ? "—" : fmt(q.sell, d);
-                if (s.dataset.v !== text) {
-                    const had = !!s.dataset.v;
-                    s.dataset.v = text;
-                    s.innerHTML = `${text}<small>${p?.currency === "₺" || !p ? "₺" : esc(p.currency)}</small>`;
-                    if (had && q.changed) flash(s, q.sellTick);
+    function $(id) { return document.getElementById(id); }
+    function getJSON(url, cb) {
+        var x = new XMLHttpRequest();
+        x.open("GET", url, true);
+        x.onload = function () { try { cb(x.status === 200 ? JSON.parse(x.responseText) : null); } catch (e) { cb(null); } };
+        x.onerror = function () { cb(null); };
+        x.send();
+    }
+    function num(v) { var n = typeof v === "string" ? parseFloat(v.replace(",", ".")) : v; return isFinite(n) && n > 0 ? n : null; }
+    function adj(v, a, pct) { if (v == null) return null; var o = pct ? v * (1 + a / 100) : v + a; return o > 0 ? o : null; }
+
+    // Same rules as PricingEngine (shared/.../data/market/Pricing.kt).
+    function price(code) {
+        var o = config.products[code] || {};
+        if (o.visible === false) return null;
+        if (o.mode === "fixed" && (o.buy > 0 || o.sell > 0)) return { buy: o.buy > 0 ? o.buy : null, sell: o.sell > 0 ? o.sell : null, chg: null };
+        var r = config.feed && config.feed.enabled === false ? null : raw[code];
+        if (!r || (r.buy == null && r.sell == null)) return null;
+        var buy = r.buy, sell = r.sell, close = r.close;
+        if (o.mode === "adjust" && (o.buyAdj || o.sellAdj)) {
+            var pct = o.adjUnit === "percent";
+            buy = adj(buy, o.buyAdj || 0, pct); sell = adj(sell, o.sellAdj || 0, pct); close = adj(close, o.sellAdj || 0, pct);
+        }
+        return { buy: buy, sell: sell, chg: sell != null && close ? (sell - close) / close * 100 : null };
+    }
+
+    function fmt(v, d) {
+        if (v == null || !isFinite(v)) return "—";
+        var s = v.toFixed(d).split(".");
+        var i = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return d > 0 ? i + "," + s[1] : i;
+    }
+    function decimals(code) { var p = catalog[code]; return !p ? 2 : p.group === "CURRENCY" ? 2 : p.decimals; }
+    function currency(code) { var p = catalog[code]; return p && p.currency && p.currency !== "₺" ? p.currency : "₺"; }
+    function formatPhone(n) {
+        var d = String(n || "").replace(/\D/g, "").replace(/^90/, "0");
+        var m = d.match(/^(0\d{3})(\d{3})(\d{2})(\d{2})$/);
+        return m ? m[1] + " " + m[2] + " " + m[3] + " " + m[4] : n;
+    }
+
+    // ---------- layout: every box the same size, all sizes from the screen ----------
+    function layout() {
+        var W = window.innerWidth, H = window.innerHeight;
+        var safe = Math.round(Math.min(W, H) * 0.035);          // overscan margin
+        var stage = $("stage");
+        stage.style.width = (W - 2 * safe) + "px";
+        stage.style.height = (H - 2 * safe) + "px";
+        stage.style.left = safe + "px";
+        stage.style.top = safe + "px";
+        var u = Math.min(W / 100, H / 56.25);                   // 1% of a 16:9 frame
+        var gap = Math.round(u * 1.1);
+        $("head").style.marginBottom = gap + "px";
+        $("logo").style.width = Math.round(u * 5.4) + "px";
+        $("logo").style.height = "auto";
+        $("logo").style.marginRight = Math.round(u * 1.4) + "px";
+        $("brand").style.fontSize = Math.round(u * 3.1) + "px";
+        $("brandSub").style.fontSize = Math.round(u * 0.85) + "px";
+        $("brandSub").style.marginTop = Math.round(u * 0.5) + "px";
+        $("time").style.fontSize = Math.round(u * 3.4) + "px";
+        $("date").style.fontSize = Math.round(u * 1.05) + "px";
+        var foot = $("foot");
+        foot.style.fontSize = Math.round(u * 1.15) + "px";
+        foot.style.marginTop = gap + "px";
+        foot.style.paddingTop = Math.round(u * 0.9) + "px";
+
+        var n = Math.max(1, tiles.length);
+        var portrait = H > W;
+        var rows = portrait ? Math.ceil(n / (n <= 4 ? 1 : 2)) : (n <= 4 ? 1 : n <= 10 ? 2 : 3);
+        var cols = Math.ceil(n / rows);
+        var grid = $("grid");
+        grid.style.gridTemplateColumns = "repeat(" + cols + ", minmax(0, 1fr))";
+        grid.style.gridTemplateRows = "repeat(" + rows + ", minmax(0, 1fr))";
+        grid.style.gridGap = gap + "px";
+        grid.style.gap = gap + "px";
+
+        // Size text from the actual box size so long prices still fit.
+        var gw = stage.clientWidth, gh = grid.clientHeight || (stage.clientHeight * 0.75);
+        var tw = (gw - gap * (cols - 1)) / cols, th = (gh - gap * (rows - 1)) / rows;
+        var sellPx = Math.min(tw / 5.2, th / 2.6);
+        for (var i = 0; i < els.length; i++) {
+            var e = els[i];
+            e.tile.style.padding = Math.round(th * 0.12) + "px " + Math.round(tw * 0.08) + "px";
+            e.tile.style.borderRadius = Math.round(u * 1.4) + "px";
+            e.label.style.fontSize = Math.round(Math.min(tw / 11, th / 7.5)) + "px";
+            e.chg.style.fontSize = Math.round(Math.min(tw / 17, th / 11)) + "px";
+            e.chg.style.padding = Math.round(u * 0.3) + "px " + Math.round(u * 0.6) + "px";
+            e.sell.style.fontSize = Math.round(sellPx) + "px";
+            e.buy.style.fontSize = Math.round(Math.min(tw / 14, th / 9)) + "px";
+        }
+    }
+
+    function build() {
+        var grid = $("grid");
+        grid.innerHTML = "";
+        els = [];
+        for (var i = 0; i < tiles.length; i++) {
+            var tile = document.createElement("div");
+            tile.className = "tile";
+            tile.innerHTML = '<div class="label"><span></span><span class="chg"></span></div><div class="sell">—</div><div class="buy">Alış <b>—</b></div>';
+            tile.querySelector(".label span").textContent = tiles[i].label;
+            grid.appendChild(tile);
+            els.push({ code: tiles[i].code, tile: tile, label: tile.querySelector(".label"), chg: tile.querySelector(".chg"),
+                       sell: tile.querySelector(".sell"), buy: tile.querySelector(".buy"), buyB: tile.querySelector(".buy b") });
+        }
+        layout();
+    }
+
+    function render() {
+        for (var i = 0; i < els.length; i++) {
+            var e = els[i], q = price(e.code);
+            if (!q) continue;
+            var d = decimals(e.code);
+            var prev = shown[e.code];
+            var text = fmt(q.sell, d);
+            if (prev !== text) {
+                e.sell.innerHTML = text + "<small>" + currency(e.code) + "</small>";
+                if (prev && q.sell != null && shown[e.code + ":v"] != null) {
+                    e.sell.className = "sell " + (q.sell > shown[e.code + ":v"] ? "flash-up" : "flash-down");
+                    (function (el) { setTimeout(function () { el.className = "sell"; }, 1200); })(e.sell);
                 }
-                tile.querySelector("[data-b]").textContent = q.buy == null ? "—" : fmt(q.buy, d);
-                const c = tile.querySelector("[data-c]");
-                c.className = "chg " + (q.changePct == null ? "" : q.changePct >= 0 ? "up" : "down");
-                c.textContent = q.changePct == null ? "" : `${q.changePct >= 0 ? "▲" : "▼"} ${fmtPct(q.changePct)}`;
-                c.hidden = q.changePct == null;
-                const t = tile.querySelector("[data-t]");
-                if (t) t.textContent = p ? (p.unitHint && p.code !== "ALTIN" ? p.unitHint : "GRAM") : "";
+                shown[e.code] = text;
+                shown[e.code + ":v"] = q.sell;
             }
-        },
+            e.buyB.textContent = fmt(q.buy, d);
+            if (q.chg == null) { e.chg.style.visibility = "hidden"; }
+            else {
+                e.chg.style.visibility = "visible";
+                e.chg.className = "chg " + (q.chg >= 0 ? "up" : "down");
+                e.chg.textContent = (q.chg >= 0 ? "▲ %" : "▼ %") + fmt(Math.abs(q.chg), 2);
+            }
+        }
+    }
+
+    // ---------- live feed (Socket.IO v4 over WebSocket) ----------
+    var socket = null, retry = 0;
+    function connect() {
+        if (config.feed && config.feed.enabled === false) return;
+        var base = String((config.feed && config.feed.url) || FEED).replace(/^https:/, "wss:").replace(/\/$/, "");
+        var url = base.indexOf("/socket.io/") >= 0 ? base : base + "/socket.io/?EIO=4&transport=websocket";
+        try { socket = new WebSocket(url); } catch (e) { setTimeout(connect, 5000); return; }
+        socket.onmessage = function (m) {
+            var d = String(m.data);
+            if (d.charAt(0) === "0") socket.send("40");
+            else if (d === "2") socket.send("3");
+            else if (d.indexOf("42") === 0) {
+                var arr;
+                try { arr = JSON.parse(d.slice(2).replace(/^\d+/, "")); } catch (e) { return; }
+                if (!arr || arr[0] !== "price_changed" || !arr[1] || !arr[1].data) return;
+                retry = 0;
+                lastData = Date.now();
+                var data = arr[1].data;
+                for (var k in data) {
+                    if (!data.hasOwnProperty(k)) continue;
+                    var q = data[k] || {};
+                    raw[q.code || k] = { buy: num(q.alis), sell: num(q.satis), close: num(q.kapanis) };
+                }
+                render();
+            }
+        };
+        socket.onclose = function () { socket = null; setTimeout(connect, Math.min(30000, 1000 * Math.pow(2, retry++))); };
+    }
+
+    function tick() {
+        var t = new Date(Date.now() + 3 * 3600000);  // Istanbul time
+        function pad(x) { return (x < 10 ? "0" : "") + x; }
+        $("time").textContent = pad(t.getUTCHours()) + ":" + pad(t.getUTCMinutes());
+        $("date").textContent = t.getUTCDate() + " " + MONTHS[t.getUTCMonth()] + " " + DAYS[t.getUTCDay()];
+        var off = config.feed && config.feed.enabled === false;
+        var quiet = lastData && Date.now() - lastData > 3 * 60000;
+        $("state").textContent = !lastData && !off ? "Fiyatlar yükleniyor…" : quiet ? "Fiyatlar " + Math.round((Date.now() - lastData) / 60000) + " dk önce güncellendi" : "";
+        $("state").className = quiet ? "stale" : "";
+    }
+
+    // Burn-in protection: shift the whole board a few pixels every 3 minutes.
+    var drift = 0;
+    function shift() {
+        var s = Math.round(Math.min(window.innerWidth, window.innerHeight) * 0.006);
+        var steps = [[0, 0], [s, 0], [s, s], [0, s], [-s, s], [-s, 0], [-s, -s], [0, -s]];
+        var p = steps[drift++ % steps.length];
+        $("stage").style.transform = "translate(" + p[0] + "px," + p[1] + "px)";
+    }
+
+    function start() {
+        $("phone").textContent = formatPhone(config.store && (config.store.phone || config.store.whatsapp));
+        if (config.site && config.site.tv && config.site.tv.length) tiles = config.site.tv;
+        build();
+        render();
+        connect();
+        tick();
+        setInterval(tick, 1000);
+        setInterval(shift, 3 * 60000);
+    }
+
+    var waiting = 2;
+    function ready() { if (--waiting === 0) start(); }
+    getJSON("/api/config", function (doc) {
+        if (doc) {
+            config = doc;
+            config.products = doc.products || {};
+            config.store = doc.store || { phone: "+905436118088" };
+            config.feed = doc.feed || { url: FEED, enabled: true };
+        }
+        ready();
+    });
+    getJSON("/catalog.json", function (doc) {
+        if (doc && doc.products) for (var i = 0; i < doc.products.length; i++) catalog[doc.products[i].code] = doc.products[i];
+        ready();
     });
 
-    const tick = () => {
-        const { date, day } = istanbulNow();
-        const pad = (x) => String(x).padStart(2, "0");
-        document.getElementById("time").textContent = `${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
-        document.getElementById("date").textContent = `${date.getUTCDate()} ${["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"][date.getUTCMonth()]} ${DAY_LONG[day - 1]}`;
-    };
-    tick();
-    setInterval(tick, 1000);
-
-    // Keep the TV awake and pick up admin changes: reload every 30 minutes.
-    try { await navigator.wakeLock?.request("screen"); } catch {}
-    setTimeout(() => location.reload(), 30 * 60 * 1000);
+    window.addEventListener("resize", layout);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+    // Click / OK on the remote: go full screen.
+    document.addEventListener("click", function () {
+        var el = document.documentElement, f = el.requestFullscreen || el.webkitRequestFullscreen;
+        if (f && !document.fullscreenElement && !document.webkitFullscreenElement) { try { f.call(el); } catch (e) {} }
+    });
+    // Keep the screen awake where supported, and pick up admin changes every 30 minutes.
+    function wake() { try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(function () {}); } catch (e) {} }
+    wake();
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") { wake(); if (!socket) connect(); } });
+    setTimeout(function () { location.reload(); }, 30 * 60000);
+})();
 </script>
 </body>
 </html>

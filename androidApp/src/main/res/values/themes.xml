@@ -1,7 +1,7 @@
 <resources>
-    <!-- Dark window background avoids a white flash before the first frame. -->
+    <!-- Light window background matches the app (always day mode). -->
     <style name="Theme.Mercan" parent="@android:style/Theme.Material.NoActionBar">
-        <item name="android:windowBackground">@color/brand_black</item>
+        <item name="android:windowBackground">@color/brand_paper</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>

@@ -1,8 +1,8 @@
-import { DAY_LONG, esc, fmt, istanbulNow, loadCatalog, loadConfig, mapsEmbed, openState, productName, siteDecimals, startLive } from "./live.js";
-import { siteContent, iconFor, iconSvg } from "./site-defaults.js";
-import { arrowIcon, flash, initChrome, reveal } from "./chrome.js";
-import { createBoard } from "./board.js";
-import { renderProducts } from "./products.js";
+import { DAY_LONG, esc, fmt, istanbulNow, loadCatalog, loadConfig, mapsEmbed, openState, productName, siteDecimals, startLive } from "./live.js?v=202611182247";
+import { siteContent, iconFor, iconSvg } from "./site-defaults.js?v=202611182247";
+import { arrowIcon, flash, initChrome, reveal } from "./chrome.js?v=202611182247";
+import { createBoard } from "./board.js?v=202611182247";
+import { renderProducts } from "./products.js?v=202611182247";
 
 const [config, catalog] = await Promise.all([loadConfig(), loadCatalog()]);
 const site = siteContent(config);
@@ -104,7 +104,11 @@ const updatedEl = document.querySelector("[data-updated]");
 
 startLive({
   config,
-  onStatus(s) { if (s === "offline") updatedEl.textContent = "Bağlantı bekleniyor"; },
+  onStatus(s) {
+    const pill = document.querySelector("[data-live]");
+    pill.classList.toggle("off", s !== "live");
+    document.querySelector("[data-live-text]").textContent = s === "live" ? "Canlı" : s === "offline" ? "Bağlantı bekleniyor" : "Bağlanıyor";
+  },
   onUpdate(quotes) {
     board.update(quotes);
     calc.update(quotes);
@@ -123,7 +127,7 @@ startLive({
       if (q) el.textContent = `${fmt(q.sell, siteDecimals(catalog.get(el.dataset.mini)))} ₺`;
     }
     const { date } = istanbulNow();
-    updatedEl.textContent = `${String(date.getUTCHours()).padStart(2, "0")}:${String(date.getUTCMinutes()).padStart(2, "0")} itibarıyla`;
+    updatedEl.textContent = `Son güncelleme ${String(date.getUTCHours()).padStart(2, "0")}:${String(date.getUTCMinutes()).padStart(2, "0")}:${String(date.getUTCSeconds()).padStart(2, "0")}`;
   },
 });
 

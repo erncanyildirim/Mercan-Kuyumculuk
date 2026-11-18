@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.suer.mercankuyumculuk.data.ThemeMode
 import com.suer.mercankuyumculuk.ui.calc.CalculatorScreen
 import com.suer.mercankuyumculuk.ui.collection.CollectionScreen
 import com.suer.mercankuyumculuk.ui.components.BrandMark
@@ -40,7 +39,6 @@ import com.suer.mercankuyumculuk.ui.settings.SettingsScreen
 import com.suer.mercankuyumculuk.ui.store.StoreScreen
 import com.suer.mercankuyumculuk.ui.theme.AppTheme
 import com.suer.mercankuyumculuk.ui.theme.MercanTheme
-import androidx.compose.foundation.isSystemInDarkTheme
 
 private enum class Destination(val label: String, val icon: ImageVector) {
     PRICES("Fiyatlar", AppIcons.ShowChart),
@@ -58,7 +56,6 @@ internal expect fun SystemBarsEffect(darkTheme: Boolean)
 fun App() {
     val market = AppGraph.market
     val prefs = AppGraph.preferences
-    val theme by prefs.theme.collectAsStateWithLifecycle()
     val state by market.state.collectAsStateWithLifecycle()
     val favorites by prefs.favorites.collectAsStateWithLifecycle()
     val calcProduct by prefs.calcProduct.collectAsStateWithLifecycle()
@@ -69,14 +66,9 @@ fun App() {
         onStopOrDispose { market.stop() }
     }
 
-    val dark = when (theme) {
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-        ThemeMode.DARK -> true
-        ThemeMode.LIGHT -> false
-    }
-    SystemBarsEffect(dark)
+    SystemBarsEffect(darkTheme = false)
 
-    MercanTheme(theme) {
+    MercanTheme {
         var destination by rememberSaveable { mutableStateOf(Destination.PRICES) }
         val share = rememberShareText()
         val c = AppTheme.colors
@@ -99,8 +91,6 @@ fun App() {
                 )
                 Destination.STORE -> StoreScreen(state.store, modifier)
                 Destination.SETTINGS -> SettingsScreen(
-                    theme = theme,
-                    onThemeChange = prefs::setTheme,
                     onShareApp = {
                         share("${state.store.name} ${state.store.city} canlı altın ve döviz fiyatları: ${AppLinks.SITE_URL}")
                     },

@@ -7,18 +7,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-enum class ThemeMode { SYSTEM, DARK, LIGHT }
-
 /** Per-device preferences. Nothing here leaves the device. */
 class Preferences(private val store: LocalStore) {
 
     private val _favorites = MutableStateFlow(loadFavorites())
     val favorites: StateFlow<List<String>> = _favorites.asStateFlow()
-
-    private val _theme = MutableStateFlow(
-        store.getString(StoreKeys.THEME)?.let { v -> ThemeMode.entries.firstOrNull { it.name == v } } ?: ThemeMode.DARK,
-    )
-    val theme: StateFlow<ThemeMode> = _theme.asStateFlow()
 
     private val _calcProduct = MutableStateFlow(store.getString(StoreKeys.CALC_PRODUCT) ?: Catalog.HAS_ALTIN)
     val calcProduct: StateFlow<String> = _calcProduct.asStateFlow()
@@ -40,11 +33,6 @@ class Preferences(private val store: LocalStore) {
         list[i] = list[j].also { list[j] = list[i] }
         _favorites.value = list
         store.putString(StoreKeys.FAVORITES, list.joinToString(","))
-    }
-
-    fun setTheme(mode: ThemeMode) {
-        _theme.value = mode
-        store.putString(StoreKeys.THEME, mode.name)
     }
 
     fun setCalcProduct(code: String) {

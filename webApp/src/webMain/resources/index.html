@@ -17,7 +17,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@400;500;600&display=swap">
-    <link rel="stylesheet" href="/assets/site.css">
+    <link rel="stylesheet" href="/assets/site.css?v=202611182247">
     <script type="application/ld+json">
     {"@context":"https://schema.org","@type":"JewelryStore","name":"Mercan Kuyumculuk","address":{"@type":"PostalAddress","streetAddress":"Alibeyli Mah. Atatürk Cad.","addressLocality":"Osmaniye","addressCountry":"TR"},"telephone":"+905436118088","url":"https://mercankuyumculukosmaniye.com.tr/","sameAs":["https://www.instagram.com/mercankuyumculuk80/"]}
     </script>
@@ -42,20 +42,20 @@
                 </div>
             </div>
             <aside class="today" aria-label="Bugünün fiyatları">
-                <div class="today-head"><h2>Bugünün fiyatları</h2><span data-updated></span></div>
+                <div class="today-head"><h2>Bugünün fiyatları</h2><span class="live-pill" data-live><i></i><span data-live-text>Bağlanıyor</span></span></div>
                 <div class="today-cols"><span>Ürün</span><span>Alış</span><span>Satış</span></div>
                 <div data-today></div>
-                <div class="today-foot"><span>Fiyatlar bilgi amaçlıdır</span><a class="link" href="/fiyatlar/">Tüm fiyatlar →</a></div>
+                <div class="today-foot"><span data-updated>Fiyatlar bilgi amaçlıdır</span><a class="link" href="/fiyatlar/">Tüm fiyatlar →</a></div>
             </aside>
         </div>
     </section>
 
     <section class="values-band">
         <div class="wrap values">
-            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span><b>Güvenilir alışveriş</b>Faturalı, damgalı ürünler</span></div>
-            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg><span><b>Güncel fiyat</b>Piyasayla eş zamanlı</span></div>
-            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 12h16M12 4v16"/><circle cx="12" cy="12" r="8.5"/></svg><span><b>Değerinde alım</b>Altınınızı nakit alıyoruz</span></div>
-            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 8h16v12H4z"/><path d="M4 8l3-4h10l3 4M12 8v12"/></svg><span><b>Özel kutu</b>Hediyeye hazır paket</span></div>
+            <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span><b>Güvenilir alışveriş</b>Faturalı, damgalı ürünler</span></div>
+            <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg><span><b>Güncel fiyat</b>Piyasayla eş zamanlı</span></div>
+            <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 12h16M12 4v16"/><circle cx="12" cy="12" r="8.5"/></svg><span><b>Değerinde alım</b>Altınınızı nakit alıyoruz</span></div>
+            <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 8h16v12H4z"/><path d="M4 8l3-4h10l3 4M12 8v12"/></svg><span><b>Özel kutu</b>Hediyeye hazır paket</span></div>
         </div>
     </section>
 
@@ -130,9 +130,9 @@
             <div class="store">
                 <div class="store-card reveal">
                     <div class="state"><span class="open-dot" data-open-dot></span><span data-open-text>Çalışma saatleri</span></div>
-                    <div class="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><div><b>Adres</b><span data-store="address"></span></div></div>
-                    <div class="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg><div><b>Çalışma saatleri</b><div class="hours" data-hours></div></div></div>
-                    <div class="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg><div><b>İletişim</b><a data-store="phone" href="#"></a><br><a href="#" data-store="instagram-href" target="_blank" rel="noopener"><span data-store="instagram"></span></a></div></div>
+                    <div class="info"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><div><b>Adres</b><span data-store="address"></span></div></div>
+                    <div class="info"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg><div><b>Çalışma saatleri</b><div class="hours" data-hours></div></div></div>
+                    <div class="info"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg><div><b>İletişim</b><a data-store="phone" href="#"></a><br><a href="#" data-store="instagram-href" target="_blank" rel="noopener"><span data-store="instagram"></span></a></div></div>
                     <div class="store-actions">
                         <a class="btn small" href="#" data-store="maps-href" target="_blank" rel="noopener">Yol tarifi al</a>
                         <a class="btn small line" href="#" data-store="whatsapp-href" target="_blank" rel="noopener">WhatsApp</a>
@@ -163,6 +163,6 @@
 </main>
 
 <div id="chrome-bottom"></div>
-<script type="module" src="/assets/home.js"></script>
+<script type="module" src="/assets/home.js?v=202611182247"></script>
 </body>
 </html>

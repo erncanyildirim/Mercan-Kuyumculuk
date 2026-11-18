@@ -1,7 +1,7 @@
 // Admin panel for the jeweler: edits the document served at /api/config.
 // Pricing math mirrors PricingEngine in shared/.../data/market/Pricing.kt.
 
-import { ensureSite, initSite, refreshGramPreviews, renderSite } from "./admin-site.js";
+import { ensureSite, initSite, refreshGramPreviews, renderSite } from "./admin-site.js?v=202611182247";
 
 const TOKEN_KEY = "mercan.admin.token";
 const DAY_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
@@ -552,21 +552,6 @@ $("#login-form").addEventListener("submit", async (e) => {
 $("#logout").addEventListener("click", () => showLogin());
 
 // Theme switch: "system" follows the computer's light/dark setting.
-const THEME_KEY = "mercan.admin.theme";
-function applyTheme(choice) {
-  if (choice === "light" || choice === "dark") document.documentElement.dataset.theme = choice;
-  else delete document.documentElement.dataset.theme;
-  for (const b of $$("[data-theme-choice]")) b.setAttribute("aria-pressed", String(b.dataset.themeChoice === choice));
-}
-let themeChoice = "system";
-try { themeChoice = localStorage.getItem(THEME_KEY) || "system"; } catch {}
-applyTheme(themeChoice);
-for (const b of $$("[data-theme-choice]")) {
-  b.addEventListener("click", () => {
-    applyTheme(b.dataset.themeChoice);
-    try { localStorage.setItem(THEME_KEY, b.dataset.themeChoice); } catch {}
-  });
-}
 $("#save").addEventListener("click", save);
 $("#discard").addEventListener("click", discard);
 $("#product-search").addEventListener("input", (e) => { view.query = e.target.value; renderProducts(); });
@@ -585,12 +570,23 @@ $("#add-hours").addEventListener("click", () => {
   updateDirty();
 });
 
-for (const tab of $$("[role=tab]")) {
+for (const tab of $$("[role=tab][data-tab]")) {
   tab.addEventListener("click", () => {
-    for (const t of $$("[role=tab]")) t.setAttribute("aria-selected", String(t === tab));
+    for (const t of $$("[role=tab][data-tab]")) t.setAttribute("aria-selected", String(t === tab));
     for (const panel of $$("[data-panel]")) panel.hidden = panel.dataset.panel !== tab.dataset.tab;
   });
 }
+
+// Web sitesi tab: show one section at a time instead of one long page.
+const SUB_KEY = "mercan.admin.siteSection";
+function showSiteSection(key) {
+  if (!$(`[data-site-section="${key}"]`)) key = "texts";
+  for (const b of $$("[data-sub]")) b.setAttribute("aria-selected", String(b.dataset.sub === key));
+  for (const sec of $$("[data-site-section]")) sec.hidden = sec.dataset.siteSection !== key;
+  try { sessionStorage.setItem(SUB_KEY, key); } catch {}
+}
+for (const b of $$("[data-sub]")) b.addEventListener("click", () => { showSiteSection(b.dataset.sub); window.scrollTo({ top: 0 }); });
+try { showSiteSection(sessionStorage.getItem(SUB_KEY) || "texts"); } catch { showSiteSection("texts"); }
 
 window.addEventListener("beforeunload", (e) => {
   if (!$("#save").disabled) e.preventDefault();

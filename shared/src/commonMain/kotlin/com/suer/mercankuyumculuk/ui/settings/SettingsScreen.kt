@@ -31,7 +31,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.suer.mercankuyumculuk.AppLinks
-import com.suer.mercankuyumculuk.data.ThemeMode
 import com.suer.mercankuyumculuk.ui.components.AppCard
 import com.suer.mercankuyumculuk.ui.icons.AppIcons
 import com.suer.mercankuyumculuk.ui.theme.AppTheme
@@ -40,8 +39,6 @@ const val APP_VERSION = "1.0"
 
 @Composable
 fun SettingsScreen(
-    theme: ThemeMode,
-    onThemeChange: (ThemeMode) -> Unit,
     onShareApp: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -71,15 +68,6 @@ fun SettingsScreen(
                 modifier = Modifier.padding(start = 4.dp, top = 4.dp).semantics { heading() },
             )
 
-            Label("Görünüm")
-            AppCard(Modifier.fillMaxWidth()) {
-                Row(Modifier.padding(6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    ThemeOption("Sistem", AppIcons.BrightnessAuto, theme == ThemeMode.SYSTEM, Modifier.weight(1f)) { onThemeChange(ThemeMode.SYSTEM) }
-                    ThemeOption("Koyu", AppIcons.DarkMode, theme == ThemeMode.DARK, Modifier.weight(1f)) { onThemeChange(ThemeMode.DARK) }
-                    ThemeOption("Açık", AppIcons.LightMode, theme == ThemeMode.LIGHT, Modifier.weight(1f)) { onThemeChange(ThemeMode.LIGHT) }
-                }
-            }
-
             Label("Diğer")
             AppCard(Modifier.fillMaxWidth()) {
                 Column {
@@ -103,7 +91,7 @@ fun SettingsScreen(
                         color = c.textMuted,
                     )
                     Text(
-                        "Uygulama üyelik istemez, kişisel veri toplamaz. Favorileriniz ve tema tercihiniz yalnızca bu cihazda saklanır.",
+                        "Uygulama üyelik istemez, kişisel veri toplamaz. Favorileriniz yalnızca bu cihazda saklanır.",
                         style = MaterialTheme.typography.bodySmall,
                         color = c.textMuted,
                     )
@@ -131,22 +119,6 @@ private fun Label(text: String) {
     )
 }
 
-@Composable
-private fun ThemeOption(label: String, icon: ImageVector, selected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    val c = AppTheme.colors
-    Column(
-        modifier
-            .clip(MaterialTheme.shapes.medium)
-            .background(if (selected) c.gold else c.card)
-            .clickable(role = Role.RadioButton, onClick = onClick)
-            .semantics { this.selected = selected }
-            .padding(vertical = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Icon(icon, contentDescription = null, tint = if (selected) c.onGold else c.textMuted, modifier = Modifier.size(22.dp))
-        Text(label, style = MaterialTheme.typography.labelLarge, color = if (selected) c.onGold else c.text)
-    }
-}
 
 @Composable
 private fun LinkRow(icon: ImageVector, title: String, onClick: () -> Unit) {

@@ -1,7 +1,7 @@
 // "Web sitesi" tab of the admin panel: categories, products (with photos), TV board and story card.
 // Edits config.site in place; texts use the generic [data-field] binding in admin.js.
-import { DEFAULT_SITE, GRAM_PRICES, gramLabel } from "../assets/site-defaults.js";
-import { esc } from "../assets/live.js";
+import { DEFAULT_SITE, GRAM_PRICES, gramLabel } from "../assets/site-defaults.js?v=202611182247";
+import { esc } from "../assets/live.js?v=202611182247";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -59,7 +59,15 @@ export function initSite(options) {
   }
 }
 
+function renderCounts() {
+  const s = site();
+  const set = (k, n) => { const el = $(`[data-count="${k}"]`); if (el) el.textContent = n ? ` ${n}` : ""; };
+  set("categories", s.categories.length);
+  set("items", s.items.length);
+}
+
 export function renderSite() {
+  renderCounts();
   renderCategories();
   renderItems();
   renderTiles("tv");
@@ -67,7 +75,7 @@ export function renderSite() {
 }
 
 function site() { return ctx.getConfig().site; }
-function changed() { ctx.onChange(); }
+function changed() { ctx.onChange(); renderCounts(); }
 
 function newId(prefix, list) {
   let id;

@@ -1,6 +1,5 @@
 package com.suer.mercankuyumculuk.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
@@ -19,7 +18,6 @@ import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.suer.mercankuyumculuk.data.ThemeMode
 import com.suer.mercankuyumculuk.resources.Res
 import com.suer.mercankuyumculuk.resources.manrope
 import org.jetbrains.compose.resources.Font
@@ -191,14 +189,10 @@ private val AppShapes = Shapes(
     extraLarge = RoundedCornerShape(28.dp),
 )
 
+/** The app always uses the light (day) palette. */
 @Composable
-fun MercanTheme(mode: ThemeMode, content: @Composable () -> Unit) {
-    val dark = when (mode) {
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-        ThemeMode.DARK -> true
-        ThemeMode.LIGHT -> false
-    }
-    val colors = if (dark) DarkAppColors else LightAppColors
+fun MercanTheme(content: @Composable () -> Unit) {
+    val colors = LightAppColors
     CompositionLocalProvider(LocalAppColors provides colors) {
         MaterialTheme(
             colorScheme = colors.toMaterial(),
