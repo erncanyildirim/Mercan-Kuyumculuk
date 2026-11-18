@@ -247,7 +247,7 @@ blockquote footer { margin-top: 18px; font: 600 11px/1 var(--sans); letter-spaci
 .info svg { width: 21px; height: 21px; color: var(--gold); margin-top: 2px; }
 .info b { display: block; font: 600 10.5px/1 var(--sans); letter-spacing: .2em; color: var(--muted); text-transform: uppercase; margin-bottom: 7px; }
 .hours { display: grid; grid-template-columns: auto 1fr; gap: 3px 22px; font-size: 14px; }
-.hours .today { color: var(--ink); font-weight: 700; }
+.hours .is-today { color: var(--ink); font-weight: 700; }
 .store-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .map { border-radius: 24px; overflow: hidden; border: 1px solid var(--line); min-height: 420px; position: relative; background: var(--paper-2); }
 .map iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; filter: grayscale(.6) sepia(.15); }

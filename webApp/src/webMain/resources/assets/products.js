@@ -1,7 +1,7 @@
 // Product cards with gram options. The price of a weight is gram × the sell price of the
 // product's priceCode (e.g. 22 ayar) after the admin's overrides, same as ItemPricing.kt.
-import { esc, fmt, whatsappHref } from "./live.js?v=202611182253";
-import { GRAM_PRICES, gramLabel, iconFor, iconSvg } from "./site-defaults.js?v=202611182253";
+import { esc, fmt, whatsappHref } from "./live.js?v=202611182254";
+import { GRAM_PRICES, gramLabel, iconFor, iconSvg } from "./site-defaults.js?v=202611182254";
 
 export function itemPrice(item, quotes, gram) {
   const unit = item.priceCode ? quotes.get(item.priceCode)?.sell : null;

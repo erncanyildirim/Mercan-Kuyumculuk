@@ -1,8 +1,8 @@
-import { DAY_LONG, esc, fmt, istanbulNow, loadCatalog, loadConfig, mapsEmbed, openState, productName, siteDecimals, startLive } from "./live.js?v=202611182253";
-import { siteContent, iconFor, iconSvg } from "./site-defaults.js?v=202611182253";
-import { arrowIcon, flash, initChrome, reveal } from "./chrome.js?v=202611182253";
-import { createBoard } from "./board.js?v=202611182253";
-import { renderProducts } from "./products.js?v=202611182253";
+import { DAY_LONG, esc, fmt, istanbulNow, loadCatalog, loadConfig, mapsEmbed, openState, productName, siteDecimals, startLive } from "./live.js?v=202611182254";
+import { siteContent, iconFor, iconSvg } from "./site-defaults.js?v=202611182254";
+import { arrowIcon, flash, initChrome, reveal } from "./chrome.js?v=202611182254";
+import { createBoard } from "./board.js?v=202611182254";
+import { renderProducts } from "./products.js?v=202611182254";
 
 const [config, catalog] = await Promise.all([loadConfig(), loadCatalog()]);
 const site = siteContent(config);
@@ -44,7 +44,7 @@ if (featured.length) {
   const rows = [];
   for (let d = 1; d <= 7; d++) {
     const ranges = (s.openingHours || []).filter((h) => h.days?.includes(d)).map((h) => `${h.open} – ${h.close}`);
-    const cls = d === today ? ' class="today"' : "";
+    const cls = d === today ? ' class="is-today"' : "";
     rows.push(`<span${cls}>${DAY_LONG[d - 1]}</span><span${cls}>${ranges.join(", ") || "Kapalı"}</span>`);
   }
   document.querySelector("[data-hours]").innerHTML = (s.openingHours || []).length ? rows.join("") : `<span>${esc(s.hoursText)}</span>`;
