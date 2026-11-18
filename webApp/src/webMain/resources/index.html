@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Mercan Kuyumculuk Osmaniye · Bilezik, Ziynet ve Canlı Altın Fiyatları</title>
+    <title>Mercan Kuyumculuk Osmaniye · Bilezik, Ziynet ve Güncel Altın Fiyatları</title>
     <meta name="description" content="Mercan Kuyumculuk Osmaniye: ajda, burma, şarnel bilezik, ziynet altını, alyans ve takı. Has altın, gram, çeyrek altın ve döviz fiyatları anlık.">
-    <meta name="theme-color" content="#0b0a08">
+    <meta name="theme-color" content="#faf8f4">
+    <meta name="color-scheme" content="light">
     <meta property="og:title" content="Mercan Kuyumculuk Osmaniye">
-    <meta property="og:description" content="Bilezik, ziynet ve takıda güvenilir adres. Canlı altın fiyatları.">
+    <meta property="og:description" content="Bilezik, ziynet ve takıda güvenilir adres. Güncel altın fiyatları.">
     <meta property="og:image" content="/icons/icon-512.png">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" href="/favicon-48.png" sizes="48x48">
@@ -15,114 +16,102 @@
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@400;500;600&display=swap">
     <link rel="stylesheet" href="/assets/site.css">
     <script type="application/ld+json">
-    {"@context":"https://schema.org","@type":"JewelryStore","name":"Mercan Kuyumculuk","address":{"@type":"PostalAddress","streetAddress":"Alibeyli Mah. Atatürk Cad.","addressLocality":"Osmaniye","addressCountry":"TR"},"telephone":"+905436118088","url":"https://mercankuyumculukosmaniye.com.tr/"}
+    {"@context":"https://schema.org","@type":"JewelryStore","name":"Mercan Kuyumculuk","address":{"@type":"PostalAddress","streetAddress":"Alibeyli Mah. Atatürk Cad.","addressLocality":"Osmaniye","addressCountry":"TR"},"telephone":"+905436118088","url":"https://mercankuyumculukosmaniye.com.tr/","sameAs":["https://www.instagram.com/mercankuyumculuk80/"]}
     </script>
 </head>
 <body>
 <div id="chrome-top"></div>
 
 <main>
-    <!-- Hero -->
     <section class="hero">
-        <canvas class="dust" aria-hidden="true"></canvas>
         <div class="wrap hero-grid">
             <div>
-                <span class="eyebrow fade-up" data-site="hero.eyebrow"></span>
+                <span class="eyebrow" data-site="hero.eyebrow"></span>
                 <h1 data-hero-title></h1>
-                <p class="lead fade-up" style="animation-delay:.35s" data-site="hero.lead"></p>
-                <div class="hero-actions fade-up" style="animation-delay:.5s">
-                    <a class="btn gold" href="/koleksiyon/">Koleksiyonu keşfet</a>
-                    <a class="btn" href="/fiyatlar/"><span class="dot off" data-live-dot></span>Canlı fiyatlar</a>
+                <p class="lead" data-site="hero.lead"></p>
+                <div class="hero-actions">
+                    <a class="btn" href="/koleksiyon/">Koleksiyonu keşfedin</a>
+                    <a class="btn line" href="#" data-store="whatsapp-href" target="_blank" rel="noopener">Fiyat sorun</a>
                 </div>
-                <div class="hero-meta fade-up" style="animation-delay:.65s">
-                    <div><b data-hero-has>—</b>Has altın · satış</div>
+                <div class="hero-facts">
                     <div><b data-store-open>—</b><span data-store-open-text>Mağaza</span></div>
+                    <div><b>Atatürk Cad.</b>Alibeyli, Osmaniye</div>
                 </div>
             </div>
-            <div class="orbit fade-up" style="animation-delay:.3s" aria-hidden="true">
-                <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
-                <div class="core"><img src="/assets/mark.svg" alt=""></div>
-                <div class="pcard p1" data-card="ALTIN"><div class="n">Has Altın <span data-c></span></div><div class="s" data-s>—</div><div class="b">Alış <span data-b>—</span></div></div>
-                <div class="pcard p2" data-card="AYAR22"><div class="n">22 Ayar <span data-c></span></div><div class="s" data-s>—</div><div class="b">Alış <span data-b>—</span></div></div>
-                <div class="pcard p3" data-card="CEYREK_YENI"><div class="n">Çeyrek <span data-c></span></div><div class="s" data-s>—</div><div class="b">Alış <span data-b>—</span></div></div>
-            </div>
+            <aside class="today" aria-label="Bugünün fiyatları">
+                <div class="today-head"><h2>Bugünün fiyatları</h2><span data-updated></span></div>
+                <div class="today-cols"><span>Ürün</span><span>Alış</span><span>Satış</span></div>
+                <div data-today></div>
+                <div class="today-foot"><span>Fiyatlar bilgi amaçlıdır</span><a class="link" href="/fiyatlar/">Tüm fiyatlar →</a></div>
+            </aside>
         </div>
     </section>
 
-    <!-- Trust -->
-    <section class="trust">
-        <div class="wrap trust-row">
+    <section class="values-band">
+        <div class="wrap values">
             <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span><b>Güvenilir alışveriş</b>Faturalı, damgalı ürünler</span></div>
-            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg><span><b>Anlık fiyat</b>Piyasayla eş zamanlı</span></div>
-            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg><span><b>Hızlı alım satım</b>Altınınız değerinde</span></div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg><span><b>Güncel fiyat</b>Piyasayla eş zamanlı</span></div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 12h16M12 4v16"/><circle cx="12" cy="12" r="8.5"/></svg><span><b>Değerinde alım</b>Altınınızı nakit alıyoruz</span></div>
             <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 8h16v12H4z"/><path d="M4 8l3-4h10l3 4M12 8v12"/></svg><span><b>Özel kutu</b>Hediyeye hazır paket</span></div>
         </div>
     </section>
 
-    <!-- Categories -->
     <section class="section" id="koleksiyon">
         <div class="wrap">
-            <div class="section-head reveal">
-                <div><span class="eyebrow">Koleksiyon</span><h2>Her ana yakışan <em class="gold-text">bir parça</em></h2></div>
-                <p>Bileziklerden ziynete, alyanstan pırlantaya. Bir kategori seçin, modelleri görün ya da doğrudan bize yazın.</p>
+            <div class="head reveal">
+                <div><span class="eyebrow">Koleksiyon</span><h2>Her ana yakışan <em class="gold">bir parça</em></h2></div>
+                <a class="link" href="/koleksiyon/">Tüm koleksiyon →</a>
             </div>
             <div class="cats" data-cats></div>
         </div>
     </section>
 
-    <div class="words" aria-hidden="true"><div class="words-track" data-words></div></div>
-
-    <!-- Live prices -->
-    <section class="section prices" id="fiyatlar">
+    <section class="section alt" data-featured-section hidden>
         <div class="wrap">
-            <div class="section-head reveal">
-                <div><span class="eyebrow">Canlı piyasa</span><h2>Güncel <em class="gold-text">altın fiyatları</em></h2></div>
-                <p>Fiyatlar saniyeler içinde güncellenir. Mağaza fiyatlarımız burada gördüğünüz fiyatlardır.</p>
+            <div class="head reveal">
+                <div><span class="eyebrow">Öne çıkanlar</span><h2>Gramını seçin, <em class="gold">fiyatını görün</em></h2></div>
+                <p>Fiyatlar seçtiğiniz grama ve güncel gram fiyatımıza göre anında hesaplanır.</p>
+            </div>
+            <div class="items" data-featured></div>
+        </div>
+    </section>
+
+    <section class="section" id="fiyatlar">
+        <div class="wrap">
+            <div class="head reveal">
+                <div><span class="eyebrow">Piyasa</span><h2>Güncel <em class="gold">fiyatlar</em></h2></div>
+                <p>Mağaza fiyatlarımız burada gördüğünüz fiyatlardır.</p>
             </div>
             <div class="board reveal" data-board>
                 <div class="board-top">
                     <div class="tabs" role="tablist" data-tabs></div>
-                    <div class="status"><span class="dot off" data-live-dot></span><span data-status>Bağlanıyor…</span></div>
+                    <div class="status" data-status></div>
                 </div>
                 <table class="ptable">
                     <thead><tr><th>Ürün</th><th>Alış</th><th>Satış</th><th class="col-chg">Değişim</th></tr></thead>
                     <tbody data-rows></tbody>
                 </table>
-                <div class="board-foot"><span>Fiyatlar bilgi amaçlıdır · <span data-updated></span></span><a href="/fiyatlar/">Tüm fiyatlar →</a></div>
+                <div class="board-foot"><span>Fiyatlar bilgi amaçlıdır</span><a class="link" href="/fiyatlar/">Tüm fiyatlar →</a></div>
             </div>
 
-            <div class="calc-grid">
-                <form class="calc reveal" data-calc onsubmit="return false">
-                    <span class="eyebrow">Hesaplayıcı</span>
-                    <h3>Altınınız bugün ne eder?</h3>
-                    <div class="row">
-                        <select data-calc-product aria-label="Ürün"></select>
-                        <input data-calc-amount type="number" inputmode="decimal" min="0" step="any" value="10" aria-label="Miktar">
-                    </div>
-                    <div class="tabs" role="tablist" data-calc-side style="width:fit-content">
-                        <button type="button" data-side="buy" aria-selected="true">Bize satarsanız</button>
-                        <button type="button" data-side="sell" aria-selected="false">Bizden alırsanız</button>
-                    </div>
-                    <div class="result"><b data-calc-result>—</b><span data-calc-note></span></div>
-                </form>
-                <div class="cta-card reveal">
-                    <div>
-                        <span class="eyebrow">Fiyat teyidi</span>
-                        <h3 style="margin-top:14px">Almadan önce bize bir mesaj atın</h3>
-                    </div>
-                    <p>Gram, model ve işçilik bilgisini paylaşın; size en güncel fiyatı hemen iletelim.</p>
-                    <a class="btn gold" href="#" data-store="whatsapp-href" target="_blank" rel="noopener">WhatsApp’tan fiyat sor</a>
+            <form class="calc reveal" onsubmit="return false">
+                <h3>Altınınız bugün ne eder?</h3>
+                <label>Ürün <select data-calc-product></select></label>
+                <label>Miktar <input data-calc-amount type="number" inputmode="decimal" min="0" step="any" value="10"></label>
+                <div class="tabs" role="tablist" data-calc-side>
+                    <button type="button" data-side="buy" aria-selected="true">Bize satarsanız</button>
+                    <button type="button" data-side="sell" aria-selected="false">Bizden alırsanız</button>
                 </div>
-            </div>
+                <div class="result"><b data-calc-result>—</b><span data-calc-note></span></div>
+            </form>
         </div>
     </section>
 
-    <!-- About -->
-    <section class="section" id="hakkimizda">
-        <div class="wrap about-grid">
+    <section class="section alt" id="hakkimizda">
+        <div class="wrap about">
             <div class="reveal">
                 <span class="eyebrow">Hakkımızda</span>
                 <h2 data-site="about.title"></h2>
@@ -132,23 +121,21 @@
         </div>
     </section>
 
-    <!-- Store -->
-    <section class="section" id="magaza" style="padding-top:20px">
+    <section class="section" id="magaza">
         <div class="wrap">
-            <div class="section-head reveal">
-                <div><span class="eyebrow">Mağaza</span><h2>Bizi <em class="gold-text">ziyaret edin</em></h2></div>
-                <p>Atatürk Caddesi’ndeki mağazamızda tüm modelleri yakından görebilir, denemeler yapabilirsiniz.</p>
+            <div class="head reveal">
+                <div><span class="eyebrow">Mağaza</span><h2>Bizi <em class="gold">ziyaret edin</em></h2></div>
+                <p>Tüm modelleri mağazamızda yakından görebilir, deneyebilirsiniz.</p>
             </div>
-            <div class="store-grid">
+            <div class="store">
                 <div class="store-card reveal">
-                    <span class="open" data-open-pill><span class="dot"></span><span data-open-text>Çalışma saatleri</span></span>
+                    <div class="state"><span class="open-dot" data-open-dot></span><span data-open-text>Çalışma saatleri</span></div>
                     <div class="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><div><b>Adres</b><span data-store="address"></span></div></div>
                     <div class="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg><div><b>Çalışma saatleri</b><div class="hours" data-hours></div></div></div>
-                    <div class="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg><div><b>Telefon</b><a data-store="phone" href="#"></a></div></div>
+                    <div class="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg><div><b>İletişim</b><a data-store="phone" href="#"></a><br><a href="#" data-store="instagram-href" target="_blank" rel="noopener"><span data-store="instagram"></span></a></div></div>
                     <div class="store-actions">
-                        <a class="btn gold small" href="#" data-store="maps-href" target="_blank" rel="noopener">Yol tarifi al</a>
-                        <a class="btn small" href="#" data-store="whatsapp-href" target="_blank" rel="noopener">WhatsApp</a>
-                        <a class="btn small" href="#" data-store="instagram-href" target="_blank" rel="noopener">Instagram</a>
+                        <a class="btn small" href="#" data-store="maps-href" target="_blank" rel="noopener">Yol tarifi al</a>
+                        <a class="btn small line" href="#" data-store="whatsapp-href" target="_blank" rel="noopener">WhatsApp</a>
                     </div>
                 </div>
                 <div class="map reveal" data-map></div>
@@ -156,23 +143,19 @@
         </div>
     </section>
 
-    <!-- App -->
     <section class="section" style="padding-top:0">
         <div class="wrap">
-            <div class="app-band reveal">
+            <div class="app reveal">
                 <div>
                     <span class="eyebrow">Mobil uygulama</span>
-                    <h2>Fiyatlar artık <em class="gold-text">cebinizde</em></h2>
-                    <p>Mercan Kuyumculuk uygulamasıyla canlı fiyatları takip edin, favori ürünlerinizi kaydedin, altın hesaplayıcıyı kullanın.</p>
-                    <a class="btn gold" href="https://apps.apple.com/app/id6822007593" target="_blank" rel="noopener">App Store’dan indir</a>
+                    <h2>Fiyatlar ve koleksiyon cebinizde</h2>
+                    <p>Güncel fiyatları takip edin, ürünlerin gram fiyatlarını görün, altın hesaplayıcıyı kullanın.</p>
+                    <a class="btn" href="https://apps.apple.com/app/id6822007593" target="_blank" rel="noopener">App Store’dan indirin</a>
                 </div>
-                <div class="phone" aria-hidden="true">
-                    <img src="/assets/mark.svg" alt="">
+                <div class="badges" aria-hidden="true">
                     <div>Has Altın <b data-mini="ALTIN">—</b></div>
                     <div>22 Ayar <b data-mini="AYAR22">—</b></div>
-                    <div>Gram <b data-mini="KULCEALTIN">—</b></div>
                     <div>Çeyrek <b data-mini="CEYREK_YENI">—</b></div>
-                    <div>Dolar <b data-mini="USDTRY">—</b></div>
                 </div>
             </div>
         </div>

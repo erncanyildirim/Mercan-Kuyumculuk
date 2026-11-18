@@ -16,6 +16,7 @@ data class RemoteConfig(
     val store: StoreInfo = StoreInfo(),
     val announcement: Announcement = Announcement(),
     val products: Map<String, ProductOverride> = emptyMap(),
+    val site: SiteContent = SiteContent(),
 )
 
 @Serializable
@@ -41,10 +42,17 @@ data class StoreInfo(
     val lng: Double? = null,
     val hoursText: String = "Hafta içi 09:00 – 19:00",
     val openingHours: List<OpeningHours> = listOf(OpeningHours(days = listOf(1, 2, 3, 4, 5), open = "09:00", close = "19:00")),
-    val instagram: String = "",
+    val instagram: String = DEFAULT_INSTAGRAM,
     val email: String = "mercankuyumculukosmaniye@gmail.com",
     val website: String = "",
-)
+) {
+    /** The store's account, also when an older saved config left it empty. */
+    val instagramHandle: String get() = instagram.trim().removePrefix("@").substringAfterLast('/').ifBlank { DEFAULT_INSTAGRAM }
+
+    companion object {
+        const val DEFAULT_INSTAGRAM = "mercankuyumculuk80"
+    }
+}
 
 /** [days]: 1 = Monday … 7 = Sunday. Times are "HH:mm" in Istanbul time. */
 @Serializable

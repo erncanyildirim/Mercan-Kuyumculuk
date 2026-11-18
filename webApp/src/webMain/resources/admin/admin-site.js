@@ -1,6 +1,6 @@
 // "Web sitesi" tab of the admin panel: categories, products (with photos), TV board and story card.
 // Edits config.site in place; texts use the generic [data-field] binding in admin.js.
-import { DEFAULT_SITE } from "../assets/site-defaults.js";
+import { DEFAULT_SITE, GRAM_PRICES, gramLabel } from "../assets/site-defaults.js";
 import { esc } from "../assets/live.js";
 
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -42,7 +42,7 @@ export function initSite(options) {
     if (!s.categories.length) return ctx.toast("Önce bir kategori ekleyin");
     if (s.items.length >= MAX.items) return ctx.toast(`En fazla ${MAX.items} ürün olabilir`);
     const categoryId = itemFilter || s.categories[0].id;
-    s.items.unshift({ id: newId("urun", s.items), categoryId, name: "Yeni ürün", detail: "", description: "", image: "", visible: true });
+    s.items.unshift({ id: newId("urun", s.items), categoryId, name: "Yeni ürün", detail: "", description: "", image: "", visible: true, grams: [], priceCode: "AYAR22" });
     changed();
     renderSite();
     $("#items input[data-k=name]")?.select();
@@ -196,7 +196,17 @@ function renderItems() {
           <label>Ürün adı <input data-k="name" maxlength="60" required></label>
           <label>Kategori <select data-k="categoryId" data-rerender>${options}</select></label>
         </div>
-        <label>Ayar / gram <input data-k="detail" maxlength="60" placeholder="örn. 22 ayar · 15 gr"></label>
+        <div class="two">
+          <label>Fiyat hesabı
+            <select data-k="priceCode" data-rerender>
+              <option value="">Fiyat gösterme</option>
+              ${GRAM_PRICES.map(([c, t]) => `<option value="${c}">${t} gram fiyatından</option>`).join("")}
+            </select>
+          </label>
+          <label>Gram seçenekleri <input data-grams placeholder="örn. 10; 15; 20; 22,5" inputmode="decimal"></label>
+        </div>
+        <p class="muted small-text" data-gram-preview></p>
+        <label>Kısa bilgi <input data-k="detail" maxlength="60" placeholder="örn. 22 ayar · kilitli"></label>
         <label>Açıklama <textarea data-k="description" rows="2" maxlength="400"></textarea></label>
         <div class="item-actions">
           <label class="ghost small upload">Fotoğraf seç<input type="file" accept="image/jpeg,image/png,image/webp" hidden></label>
@@ -207,6 +217,7 @@ function renderItems() {
         <p class="error small-text" data-upload-status></p>
       </div>`;
     bindInputs(card, p, renderItems);
+    bindGrams(card, p);
     $("input[type=file]", card).addEventListener("change", (e) => upload(p, e.target.files[0], card));
     card.addEventListener("click", (e) => {
       const act = e.target.closest("[data-act]")?.dataset.act;
@@ -224,6 +235,45 @@ function renderItems() {
     root.append(card);
   }
   $("#add-item").disabled = s.items.length >= MAX.items;
+}
+
+/** Gram options separated by ";" or spaces (a comma is the decimal sign: 22,5). */
+export function parseGrams(text) {
+  const parts = String(text).split(/[;\s]+/).map((t) => t.trim().replace(",", ".")).filter(Boolean);
+  const nums = parts.map(Number);
+  if (nums.length > 12 || !nums.every((n) => Number.isFinite(n) && n > 0 && n <= 10000)) return null;
+  return [...new Set(nums.map((n) => Math.round(n * 100) / 100))].sort((a, b) => a - b);
+}
+
+/** Gram options input; the preview prices each weight with the current gram price. */
+function bindGrams(card, p) {
+  const input = $("[data-grams]", card);
+  const preview = $("[data-gram-preview]", card);
+  p.grams ??= [];
+  p.priceCode ??= "";
+  input.value = p.grams.map((g) => String(g).replace(".", ",")).join("; ");
+  const show = () => {
+    const unit = ctx.gramPrice?.(p.priceCode);
+    const list = p.grams.map(gramLabel).join(" · ");
+    if (!p.grams.length) preview.textContent = "Gramları noktalı virgülle yazın (örn. 10; 15; 22,5). Müşteri sitede ve uygulamada gramı seçer, fiyat gram fiyatınıza göre hesaplanır.";
+    else if (!p.priceCode) preview.textContent = `Seçenekler: ${list} (fiyat gösterilmez)`;
+    else if (unit == null) preview.textContent = `Seçenekler: ${list} · fiyat bekleniyor`;
+    else preview.textContent = "Şu anki fiyat: " + p.grams.map((g) => `${gramLabel(g)} = ${Math.round(g * unit).toLocaleString("tr-TR")} ₺`).join(" · ");
+  };
+  input.addEventListener("input", () => {
+    const grams = parseGrams(input.value);
+    input.setCustomValidity(grams ? "" : "Gramları noktalı virgülle ayırın, örn. 10; 12,5; 20");
+    if (grams) p.grams = grams;
+    changed();
+    show();
+  });
+  show();
+  card._showGrams = show;
+}
+
+/** Re-renders the gram price previews when live prices move. */
+export function refreshGramPreviews() {
+  for (const card of $$("#items .item-card")) card._showGrams?.();
 }
 
 /** Shrinks the photo in the browser (max 1200 px, JPEG) and uploads it. */

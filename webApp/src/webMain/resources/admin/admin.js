@@ -1,7 +1,7 @@
 // Admin panel for the jeweler: edits the document served at /api/config.
 // Pricing math mirrors PricingEngine in shared/.../data/market/Pricing.kt.
 
-import { ensureSite, initSite, renderSite } from "./admin-site.js";
+import { ensureSite, initSite, refreshGramPreviews, renderSite } from "./admin-site.js";
 
 const TOKEN_KEY = "mercan.admin.token";
 const DAY_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
@@ -138,7 +138,7 @@ async function showEditor() {
   saved = normalized(config);
   if (!siteReady) {
     siteReady = true;
-    initSite({ getConfig: () => config, onChange: updateDirty, getToken: () => token, catalog, toast });
+    initSite({ getConfig: () => config, onChange: updateDirty, getToken: () => token, catalog, toast, gramPrice: (code) => (code ? priced(code)?.sell ?? null : null) });
   }
   renderSite();
   renderGroupChips();
@@ -512,6 +512,7 @@ function connectFeed() {
         const p = catalog.find((x) => x.code === card.dataset.code);
         if (p) updateCard(card, p);
       }
+      refreshGramPreviews();
     }
   };
   socket.onclose = () => {

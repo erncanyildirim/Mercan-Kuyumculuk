@@ -124,10 +124,10 @@ fun StoreScreen(store: StoreInfo, modifier: Modifier = Modifier) {
                             openSafely(ExternalLinks.phone(store.phone))
                         }
                     }
-                    if (store.instagram.isNotBlank()) {
+                    run {
                         HorizontalDivider(color = c.outline)
-                        InfoRow(AppIcons.PhotoCamera, "Instagram", "@" + store.instagram.trim().removePrefix("@").substringAfterLast('/')) {
-                            openSafely(ExternalLinks.instagram(store.instagram))
+                        InfoRow(AppIcons.PhotoCamera, "Instagram", "@" + store.instagramHandle) {
+                            openSafely(ExternalLinks.instagram(store.instagramHandle))
                         }
                     }
                     if (store.email.isNotBlank()) {

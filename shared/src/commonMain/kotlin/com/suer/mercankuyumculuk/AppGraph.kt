@@ -1,5 +1,6 @@
 package com.suer.mercankuyumculuk
 
+import com.suer.mercankuyumculuk.data.MediaLoader
 import com.suer.mercankuyumculuk.data.Preferences
 import com.suer.mercankuyumculuk.data.config.ConfigRepository
 import com.suer.mercankuyumculuk.data.createHttpClient
@@ -36,6 +37,10 @@ object AppGraph {
 
     val configRepository: ConfigRepository by lazy {
         ConfigRepository(httpClient, store, platformConfigEndpoints())
+    }
+
+    val media: MediaLoader by lazy {
+        MediaLoader(httpClient, platformConfigEndpoints().map { it.removeSuffix("/api/config") })
     }
 
     val market: MarketRepository by lazy {

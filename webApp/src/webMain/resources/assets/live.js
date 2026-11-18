@@ -17,7 +17,7 @@ export const DEFAULT_STORE = {
   lng: null,
   hoursText: "Hafta içi 09:00 – 19:00",
   openingHours: [{ days: [1, 2, 3, 4, 5], open: "09:00", close: "19:00" }],
-  instagram: "",
+  instagram: "mercankuyumculuk80",
   email: "mercankuyumculukosmaniye@gmail.com",
 };
 
@@ -26,7 +26,9 @@ export async function loadConfig() {
     const res = await fetch("/api/config", { cache: "no-cache" });
     if (!res.ok) throw new Error(String(res.status));
     const doc = await res.json();
-    return { ...doc, products: doc.products || {}, store: { ...DEFAULT_STORE, ...(doc.store || {}) } };
+    const store = { ...DEFAULT_STORE, ...(doc.store || {}) };
+    if (!store.instagram) store.instagram = DEFAULT_STORE.instagram;
+    return { ...doc, products: doc.products || {}, store };
   } catch {
     return { store: DEFAULT_STORE, products: {}, feed: { url: DEFAULT_FEED, enabled: true } };
   }

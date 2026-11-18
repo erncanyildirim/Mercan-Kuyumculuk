@@ -1,12 +1,6 @@
-// Shared page chrome: live ticker, header with mega menu, bangle bar, mobile drawer, footer, WhatsApp button.
-import { esc, fillStore, fmt, fmtPct, siteDecimals, whatsappHref } from "./live.js";
+// Shared page chrome: header with mega menu, bangle bar, mobile drawer, footer, WhatsApp button.
+import { esc, fillStore, whatsappHref } from "./live.js";
 import { iconFor, iconSvg } from "./site-defaults.js";
-
-const TICKER = [
-  ["ALTIN", "HAS"], ["KULCEALTIN", "GRAM"], ["AYAR22", "22 AYAR"], ["AYAR14", "14 AYAR"],
-  ["CEYREK_YENI", "ÇEYREK"], ["YARIM_YENI", "YARIM"], ["TEK_YENI", "TAM"], ["ATA_YENI", "ATA"],
-  ["USDTRY", "USD"], ["EURTRY", "EUR"], ["GBPTRY", "GBP"], ["GUMUSTRY", "GÜMÜŞ"], ["ONS", "ONS"],
-];
 
 const I = {
   chevron: '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 4.5L6 8l3.5-3.5"/></svg>',
@@ -38,14 +32,10 @@ export function initChrome({ config, site, current = "" }) {
   const top = document.getElementById("chrome-top");
   top.innerHTML = `
     ${config.announcement?.enabled && config.announcement.text ? `<div class="announce ${config.announcement.style === "warning" ? "warning" : ""}">${esc(config.announcement.text)}</div>` : ""}
-    <div class="ticker" aria-label="Canlı fiyat bandı">
-      <div class="ticker-live"><span class="dot off" data-live-dot></span>CANLI</div>
-      <div class="ticker-track" data-ticker></div>
-    </div>
     <header class="site-header">
       <div class="wrap header-row">
         <a class="brand" href="/" aria-label="${esc(store.name)} ana sayfa">
-          <img src="/assets/mark.svg" alt="" width="52" height="40">
+          <img src="/assets/mark-dark.svg" alt="" width="46" height="36">
           <span class="brand-name">Mercan<small>Kuyumculuk</small></span>
         </a>
         <nav class="nav" aria-label="Ana menü">
@@ -59,16 +49,15 @@ export function initChrome({ config, site, current = "" }) {
           ${nav.slice(1).map(([href, label, key]) => `<a href="${href}" ${current === key ? 'aria-current="page"' : ""}>${label}</a>`).join("")}
         </nav>
         <div class="header-cta">
-          <a class="btn small" href="#" data-store="phone-href">${I.phone}<span data-store="phone"></span></a>
-          <a class="btn small gold" href="${wa}" target="_blank" rel="noopener">${I.wa}WhatsApp</a>
+          <a class="btn small line" href="#" data-store="phone-href">${I.phone}<span data-store="phone"></span></a>
+          <a class="btn small" href="${wa}" target="_blank" rel="noopener">${I.wa}WhatsApp</a>
         </div>
         <button class="burger" type="button" aria-label="Menüyü aç" aria-expanded="false"><span></span><span></span><span></span></button>
       </div>
       ${barCats.length ? `
       <div class="bar-row">
         <div class="wrap bangles" aria-label="Bilezik çeşitleri">
-          <span class="label">Bilezikler</span>
-          ${barCats.map((c) => `<a href="${catHref(c)}" ${activeCat === c.id ? 'aria-current="true"' : ""}>${iconSvg(iconFor(c))}${esc(c.title)}</a>`).join("")}
+          ${barCats.map((c) => `<a href="${catHref(c)}" ${activeCat === c.id ? 'aria-current="true"' : ""}>${esc(c.title)}</a>`).join("")}
         </div>
       </div>` : ""}
     </header>
@@ -79,8 +68,8 @@ export function initChrome({ config, site, current = "" }) {
         ${nav.map(([href, label]) => `<a href="${href}">${label}</a>`).join("")}
         <h4>Koleksiyon</h4>
         <div class="drawer-cats">${cats.map((c) => `<a href="${catHref(c)}">${esc(c.title)}</a>`).join("")}</div>
-        <a class="btn gold" href="${wa}" target="_blank" rel="noopener">${I.wa}WhatsApp’tan yazın</a>
-        <a class="btn" href="#" data-store="phone-href">${I.phone}Hemen arayın</a>
+        <a class="btn" href="${wa}" target="_blank" rel="noopener">${I.wa}WhatsApp’tan yazın</a>
+        <a class="btn line" href="#" data-store="phone-href">${I.phone}Hemen arayın</a>
       </div>
     </div>`;
 
@@ -90,7 +79,7 @@ export function initChrome({ config, site, current = "" }) {
       <div class="wrap">
         <div class="foot-grid">
           <div>
-            <a class="brand" href="/"><img src="/assets/mark.svg" alt="" width="52" height="40"><span class="brand-name">Mercan<small>Kuyumculuk</small></span></a>
+            <a class="brand" href="/"><img src="/assets/mark-dark.svg" alt="" width="46" height="36"><span class="brand-name">Mercan<small>Kuyumculuk</small></span></a>
             <p>Osmaniye’de altın, bilezik, ziynet ve takıda güvenilir adres. Fiyatlar bilgi amaçlıdır; kesin fiyat için mağazamıza danışın.</p>
           </div>
           <div><h4>Koleksiyon</h4><ul>${cats.slice(0, 7).map((c) => `<li><a href="${catHref(c)}">${esc(c.title)}</a></li>`).join("")}</ul></div>
@@ -147,29 +136,9 @@ function wireMenus() {
   drawer.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setDrawer(false)));
 }
 
-/** Rebuilds the ticker from the latest prices (twice, for a seamless loop). */
-export function updateTicker(quotes, catalog) {
-  const track = document.querySelector("[data-ticker]");
-  if (!track) return;
-  const parts = [];
-  for (const [code, label] of TICKER) {
-    const q = quotes.get(code);
-    if (!q || q.sell == null) continue;
-    const p = catalog.get(code);
-    const c = q.changePct;
-    const cls = c == null ? "" : c >= 0 ? "up" : "down";
-    parts.push(`<span class="ticker-item"><b>${label}</b><span class="v">${fmt(q.sell, siteDecimals(p))}</span>${c != null ? `<span class="c ${cls}">${c >= 0 ? "▲" : "▼"} ${fmtPct(c)}</span>` : ""}</span>`);
-  }
-  if (!parts.length) return;
-  const html = parts.join("");
-  if (track.dataset.html === html) return;
-  track.dataset.html = html;
-  track.innerHTML = html + html;
-}
-
-export function setLiveDot(status) {
-  for (const d of document.querySelectorAll("[data-live-dot]")) d.classList.toggle("off", status !== "live");
-}
+/** Kept for callers; the site no longer has a ticker or live badge. */
+export function updateTicker() {}
+export function setLiveDot() {}
 
 /** Fades sections in as they scroll into view. */
 export function reveal() {

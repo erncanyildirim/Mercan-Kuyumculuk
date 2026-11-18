@@ -74,6 +74,20 @@ export function siteContent(config) {
   };
 }
 
+/** Gram prices a product can follow (Catalog codes). Same list as GramPrices in SiteContent.kt. */
+export const GRAM_PRICES = [
+  ["AYAR22", "22 Ayar"],
+  ["AYAR14", "14 Ayar"],
+  ["ALTIN", "24 Ayar (Has)"],
+  ["KULCEALTIN", "Gram Altın"],
+  ["GUMUSTRY", "Gümüş"],
+];
+
+/** "12,5 gr" */
+export function gramLabel(g) {
+  return `${Number(g).toLocaleString("tr-TR", { maximumFractionDigits: 2 })} gr`;
+}
+
 // Line drawings for category cards and the bangle bar (24×24, stroke = currentColor).
 export const ICONS = {
   bangle: '<ellipse cx="12" cy="12" rx="9" ry="5.2"/><ellipse cx="12" cy="12" rx="6.4" ry="3.2"/>',

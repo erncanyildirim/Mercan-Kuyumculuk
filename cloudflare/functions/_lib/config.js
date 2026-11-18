@@ -184,6 +184,21 @@ function priceTiles(value, max, field, withNote) {
   });
 }
 
+/**
+ * Weight options of a product and the gram price it follows: the price of each option is
+ * gram × the sell price of [priceCode] after the admin's overrides (e.g. AYAR22).
+ */
+function gramPricing(p, i) {
+  const raw = Array.isArray(p?.grams) ? p.grams : [];
+  if (raw.length > 12) throw new ValidationError(`Ürün ${i + 1}: en fazla 12 gram seçeneği olabilir`);
+  const grams = [...new Set(raw.map((g) => num(g, `Ürün ${i + 1} gram`, { min: 0.01, max: 10_000 })))]
+    .map((g) => Math.round(g * 100) / 100)
+    .sort((a, b) => a - b);
+  const priceCode = str(p?.priceCode, 24, `Ürün ${i + 1} fiyat ayarı`);
+  if (priceCode && !CODE.test(priceCode)) throw new ValidationError(`Ürün ${i + 1}: fiyat ayarı geçersiz`);
+  return { grams, priceCode };
+}
+
 /** Website content edited in the admin panel's "Web sitesi" tab. */
 export function sanitizeSite(input) {
   if (typeof input !== "object" || Array.isArray(input)) throw new ValidationError("Site ayarları geçersiz");
@@ -212,6 +227,7 @@ export function sanitizeSite(input) {
       description: str(p?.description, 400, `Ürün ${i + 1} açıklaması`),
       image: media(p?.image, `Ürün ${i + 1} fotoğrafı`),
       visible: bool(p?.visible, true),
+      ...gramPricing(p, i),
     };
   });
   return {

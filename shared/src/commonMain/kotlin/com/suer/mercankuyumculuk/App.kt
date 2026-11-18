@@ -32,6 +32,7 @@ import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.suer.mercankuyumculuk.data.ThemeMode
 import com.suer.mercankuyumculuk.ui.calc.CalculatorScreen
+import com.suer.mercankuyumculuk.ui.collection.CollectionScreen
 import com.suer.mercankuyumculuk.ui.components.BrandMark
 import com.suer.mercankuyumculuk.ui.icons.AppIcons
 import com.suer.mercankuyumculuk.ui.prices.PricesScreen
@@ -43,6 +44,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 
 private enum class Destination(val label: String, val icon: ImageVector) {
     PRICES("Fiyatlar", AppIcons.ShowChart),
+    COLLECTION("Koleksiyon", AppIcons.Diamond),
     CALCULATOR("Hesapla", AppIcons.Calculate),
     STORE("Mağaza", AppIcons.Storefront),
     SETTINGS("Ayarlar", AppIcons.Settings),
@@ -88,6 +90,7 @@ fun App() {
                     onRefresh = market::refreshNow,
                     modifier = modifier,
                 )
+                Destination.COLLECTION -> CollectionScreen(state, modifier)
                 Destination.CALCULATOR -> CalculatorScreen(
                     state = state,
                     productCode = calcProduct,

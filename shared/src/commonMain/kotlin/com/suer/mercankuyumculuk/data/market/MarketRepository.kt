@@ -5,6 +5,7 @@ import com.suer.mercankuyumculuk.data.AppJson
 import com.suer.mercankuyumculuk.data.config.Announcement
 import com.suer.mercankuyumculuk.data.config.ConfigRepository
 import com.suer.mercankuyumculuk.data.config.RemoteConfig
+import com.suer.mercankuyumculuk.data.config.SiteContent
 import com.suer.mercankuyumculuk.data.config.StoreInfo
 import com.suer.mercankuyumculuk.data.harem.HaremFeed
 import com.suer.mercankuyumculuk.data.harem.RawQuote
@@ -42,6 +43,7 @@ data class MarketState(
     val fromCache: Boolean = false,
     val store: StoreInfo = StoreInfo(),
     val announcement: Announcement = Announcement(),
+    val site: SiteContent = SiteContent(),
 ) {
     private val byCode: Map<String, PricedQuote> by lazy { quotes.associateBy { it.code } }
 
@@ -184,6 +186,7 @@ class MarketRepository(
             fromCache = cached,
             store = config.store,
             announcement = config.announcement,
+            site = config.site,
         )
     }
 
