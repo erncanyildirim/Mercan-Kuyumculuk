@@ -1,7 +1,7 @@
 // "Web sitesi" tab of the admin panel: categories, products (with photos), TV board and story card.
 // Edits config.site in place; texts use the generic [data-field] binding in admin.js.
-import { DEFAULT_SITE, GRAM_PRICES, gramLabel } from "../assets/site-defaults.js?v=202611182247";
-import { esc } from "../assets/live.js?v=202611182247";
+import { DEFAULT_SITE, GRAM_PRICES, gramLabel } from "../assets/site-defaults.js?v=202611182253";
+import { esc } from "../assets/live.js?v=202611182253";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];

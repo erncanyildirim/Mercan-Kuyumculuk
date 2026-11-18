@@ -1,8 +1,8 @@
-import { DAY_LONG, esc, fmt, istanbulNow, loadCatalog, loadConfig, mapsEmbed, openState, productName, siteDecimals, startLive } from "./live.js?v=202611182247";
-import { siteContent, iconFor, iconSvg } from "./site-defaults.js?v=202611182247";
-import { arrowIcon, flash, initChrome, reveal } from "./chrome.js?v=202611182247";
-import { createBoard } from "./board.js?v=202611182247";
-import { renderProducts } from "./products.js?v=202611182247";
+import { DAY_LONG, esc, fmt, istanbulNow, loadCatalog, loadConfig, mapsEmbed, openState, productName, siteDecimals, startLive } from "./live.js?v=202611182253";
+import { siteContent, iconFor, iconSvg } from "./site-defaults.js?v=202611182253";
+import { arrowIcon, flash, initChrome, reveal } from "./chrome.js?v=202611182253";
+import { createBoard } from "./board.js?v=202611182253";
+import { renderProducts } from "./products.js?v=202611182253";
 
 const [config, catalog] = await Promise.all([loadConfig(), loadCatalog()]);
 const site = siteContent(config);
@@ -81,15 +81,34 @@ const calc = (() => {
     for (const x of b.parentElement.children) x.setAttribute("aria-selected", String(x === b));
     render();
   });
-  sel.addEventListener("change", render);
+  // Gram products start at 1 g and go in 0,01 g steps; coins are whole pieces.
+  const label = document.querySelector("[data-calc-label]");
+  function setUnit() {
+    const p = catalog.get(sel.value);
+    const coins = p?.group === "COINS", cur = p?.group === "CURRENCY";
+    label.textContent = coins ? "Adet" : cur ? (p.unitHint || "Miktar") : "Gram";
+    amount.step = coins ? "1" : "0.01";
+    amount.min = coins || !cur ? "1" : "0.01";
+  }
+  function clamp() {
+    let n = Number(String(amount.value).replace(",", "."));
+    const min = Number(amount.min), step = Number(amount.step);
+    if (!Number.isFinite(n) || n < min) n = min;
+    n = Math.round(n / step) * step;
+    amount.value = step === 1 ? String(Math.round(n)) : String(Math.round(n * 100) / 100);
+    render();
+  }
+  sel.addEventListener("change", () => { setUnit(); clamp(); });
   amount.addEventListener("input", render);
+  amount.addEventListener("change", clamp);
+  setUnit();
   function render() {
     const p = catalog.get(sel.value);
     const q = quotes.get(sel.value);
     const n = Number(String(amount.value).replace(",", "."));
     const unit = p?.group === "COINS" ? "adet" : p?.group === "CURRENCY" ? (p.unitHint || "birim") : "gram";
     const v = q?.[side];
-    out.textContent = v != null && n > 0 ? `${fmt(v * n, 0)} ₺` : "—";
+    out.textContent = v != null && n >= Number(amount.min) ? `${fmt(v * n, 0)} ₺` : "—";
     note.textContent = v != null ? `${fmt(n || 0, n % 1 ? 2 : 0)} ${unit} × ${fmt(v, siteDecimals(p))} ₺` : "Fiyat bekleniyor";
   }
   return { update(q) { quotes = q; render(); } };

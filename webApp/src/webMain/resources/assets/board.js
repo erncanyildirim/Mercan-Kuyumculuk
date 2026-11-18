@@ -1,6 +1,6 @@
 // Live price table with group tabs, used on the home page and on /fiyatlar/.
-import { esc, fmt, fmtPct, productName, siteDecimals } from "./live.js?v=202611182247";
-import { flash } from "./chrome.js?v=202611182247";
+import { esc, fmt, fmtPct, productName, siteDecimals } from "./live.js?v=202611182253";
+import { flash } from "./chrome.js?v=202611182253";
 
 export const GROUPS = [
   ["GOLD", "Altın"], ["COINS", "Sarrafiye"], ["CURRENCY", "Döviz"], ["METALS", "Emtia"], ["PARITY", "Parite"],
