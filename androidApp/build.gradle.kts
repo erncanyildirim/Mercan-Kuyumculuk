@@ -36,8 +36,8 @@ android {
         applicationId = "com.suer.mercankuyumculuk"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.0.2"
     }
     packaging {
         resources {
