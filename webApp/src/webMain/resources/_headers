@@ -1,0 +1,18 @@
+# Cloudflare Pages static headers (no Functions call, so static traffic stays outside the free Functions quota).
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/admin/*
+  X-Robots-Tag: noindex, nofollow
+  X-Frame-Options: DENY
+  Cache-Control: no-store
+
+/assets/*
+  Cache-Control: no-cache
+
+/tv/*
+  X-Robots-Tag: noindex
+
+/story/*
+  X-Robots-Tag: noindex

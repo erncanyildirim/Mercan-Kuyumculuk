@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+Disallow: /tv/
+Disallow: /story/
+
+Sitemap: https://mercankuyumculukosmaniye.com.tr/sitemap.xml

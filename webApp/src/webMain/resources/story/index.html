@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="robots" content="noindex">
+    <title>Günün Altın Fiyatları · Mercan Kuyumculuk</title>
+    <meta name="theme-color" content="#faf8f4">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@500;600;700;800&display=swap">
+    <style>
+        * { box-sizing: border-box; }
+        html, body { margin: 0; min-height: 100%; background: #efe9de; color: #1c1917; font-family: Manrope, system-ui, sans-serif; }
+        body { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 16px 16px 24px; min-height: 100svh; }
+        canvas { height: min(calc(100svh - 110px), calc((100vw - 32px) * 16 / 9)); width: auto; aspect-ratio: 9 / 16; border-radius: 18px; box-shadow: 0 30px 70px -24px rgba(28, 25, 23, .28); }
+        .bar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        button, a.btn {
+            height: 48px; padding: 0 22px; border-radius: 999px; border: 1px solid #d8cfbf; background: #fff; color: inherit;
+            font: 700 15px Manrope, sans-serif; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+        }
+        button.gold { background: #1c1917; color: #fff; border: 0; }
+        .hint { font-size: 12.5px; color: #6b645c; text-align: center; max-width: 420px; margin: 0; }
+        @media (display-mode: fullscreen) { .bar, .hint { display: none; } }
+    </style>
+</head>
+<body>
+<canvas id="story" width="1080" height="1920" role="img" aria-label="Günün altın fiyatları"></canvas>
+<div class="bar">
+    <button class="gold" id="share" type="button">Story olarak paylaş</button>
+    <button id="download" type="button">PNG indir</button>
+</div>
+<p class="hint">Görsel canlı fiyatlarla her saniye güncellenir. “PNG indir” ile o anki fiyatları içeren 1080×1920 görseli kaydedip Instagram story’de paylaşabilirsiniz.</p>
+<script type="module">
+    import { DAY_LONG, fmt, formatPhone, istanbulNow, loadCatalog, loadConfig, siteDecimals, startLive } from "/assets/live.js?v=202611191643";
+    import { siteContent } from "/assets/site-defaults.js?v=202611191643";
+
+    const [config, catalog] = await Promise.all([loadConfig(), loadCatalog()]);
+    const rows = siteContent(config).story;
+    const store = config.store;
+    const canvas = document.getElementById("story");
+    const g = canvas.getContext("2d");
+    const W = 1080, H = 1920;
+    const SERIF = '"Cormorant Garamond", serif', SANS = "Manrope, sans-serif";
+    const MONTHS = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+
+    await Promise.all([
+        document.fonts.load(`600 100px ${SERIF}`), document.fonts.load(`italic 500 100px ${SERIF}`),
+        document.fonts.load(`700 40px ${SANS}`), document.fonts.load(`800 40px ${SANS}`), document.fonts.load(`600 40px ${SANS}`),
+    ]).catch(() => {});
+    const logo = await new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = "/assets/mark-dark.svg"; });
+
+    let quotes = new Map();
+    let live = false;
+
+    function gold(x0, y0, x1, y1) {
+        const gr = g.createLinearGradient(x0, y0, x1, y1);
+        gr.addColorStop(0, "#7c5c0e"); gr.addColorStop(.5, "#a8801c"); gr.addColorStop(1, "#7c5c0e");
+        return gr;
+    }
+
+    function text(str, x, y, font, color, align = "left", spacing = 0) {
+        g.font = font; g.fillStyle = color; g.textAlign = align; g.textBaseline = "alphabetic";
+        if ("letterSpacing" in g) g.letterSpacing = `${spacing}px`;
+        g.fillText(str, x, y);
+        if ("letterSpacing" in g) g.letterSpacing = "0px";
+    }
+
+    function draw() {
+        // background
+        g.fillStyle = "#faf8f4"; g.fillRect(0, 0, W, H);
+        let rg = g.createRadialGradient(W * .85, 120, 0, W * .85, 120, 1100);
+        rg.addColorStop(0, "rgba(201,162,74,.22)"); rg.addColorStop(.45, "rgba(201,162,74,.05)"); rg.addColorStop(1, "rgba(0,0,0,0)");
+        g.fillStyle = rg; g.fillRect(0, 0, W, H);
+        rg = g.createRadialGradient(80, H - 120, 0, 80, H - 120, 900);
+        rg.addColorStop(0, "rgba(201,162,74,.12)"); rg.addColorStop(1, "rgba(0,0,0,0)");
+        g.fillStyle = rg; g.fillRect(0, 0, W, H);
+        // frame
+        g.strokeStyle = "rgba(154,116,20,.35)"; g.lineWidth = 2;
+        roundRect(44, 44, W - 88, H - 88, 46); g.stroke();
+        g.strokeStyle = "rgba(154,116,20,.14)";
+        roundRect(60, 60, W - 120, H - 120, 36); g.stroke();
+        // orbit lines behind the logo
+        g.strokeStyle = "rgba(154,116,20,.22)"; g.setLineDash([6, 10]);
+        g.beginPath(); g.arc(W / 2, 290, 190, 0, Math.PI * 2); g.stroke(); g.setLineDash([]);
+        g.strokeStyle = "rgba(154,116,20,.12)";
+        g.beginPath(); g.arc(W / 2, 290, 150, 0, Math.PI * 2); g.stroke();
+
+        if (logo) { g.save(); g.shadowColor = "rgba(154,116,20,.18)"; g.shadowBlur = 30; const lw = 260, lh = lw * logo.height / logo.width; g.drawImage(logo, W / 2 - lw / 2, 290 - lh / 2, lw, lh); g.restore(); }
+        text("Mercan", W / 2, 590, `600 104px ${SERIF}`, "#1c1917", "center");
+        text("KUYUMCULUK · OSMANİYE", W / 2, 642, `700 24px ${SANS}`, "#9a7414", "center", 9);
+
+        // title + date pill
+        const { date, day } = istanbulNow();
+        const pad = (x) => String(x).padStart(2, "0");
+        text("Günün", W / 2, 776, `italic 500 64px ${SERIF}`, "#6b645c", "center");
+        g.font = `600 92px ${SERIF}`;
+        g.fillStyle = gold(200, 0, 880, 0); g.textAlign = "center"; g.fillText("Altın Fiyatları", W / 2, 866);
+        const pill = `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]} ${DAY_LONG[day - 1]} · ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
+        g.font = `700 28px ${SANS}`;
+        const pw = g.measureText(pill).width + 110;
+        g.fillStyle = "#ffffff"; g.strokeStyle = "#d8cfbf";
+        roundRect(W / 2 - pw / 2, 908, pw, 66, 33); g.fill(); g.stroke();
+        g.fillStyle = live ? "#15803d" : "#8a8170"; g.beginPath(); g.arc(W / 2 - pw / 2 + 38, 941, 8, 0, Math.PI * 2); g.fill();
+        text(pill, W / 2 + 18, 951, `700 28px ${SANS}`, "#1c1917", "center");
+
+        // rows
+        const top = 1030, bottom = 1640;
+        const rh = Math.min(118, (bottom - top) / Math.max(1, rows.length));
+        g.font = `700 22px ${SANS}`;
+        text("ALIŞ", 630, top - 8, `800 20px ${SANS}`, "#8a8170", "right", 4);
+        text("SATIŞ", W - 112, top - 8, `800 20px ${SANS}`, "#8a8170", "right", 4);
+        rows.forEach((r, i) => {
+            const y = top + i * rh;
+            const mid = y + rh / 2;
+            if (i % 2 === 0) { g.fillStyle = "#ffffff"; roundRect(96, y + 8, W - 192, rh - 16, 22); g.fill(); }
+            const q = quotes.get(r.code);
+            const p = catalog.get(r.code);
+            const d = Math.min(2, siteDecimals(p));
+            text(r.label, 128, r.note ? mid + 2 : mid + 16, `800 40px ${SANS}`, "#1c1917", "left", 2);
+            if (r.note) text(r.note.toLocaleUpperCase("tr"), 130, mid + 36, `700 20px ${SANS}`, "#9a7414", "left", 4);
+            text(q?.buy != null ? fmt(q.buy, d) : "—", 630, mid + 14, `600 34px ${SANS}`, "#6b645c", "right");
+            g.font = `800 54px ${SANS}`; g.textAlign = "right"; g.fillStyle = gold(700, 0, W - 100, 0);
+            g.fillText(q?.sell != null ? `${fmt(q.sell, d)} ₺` : "—", W - 112, mid + 19);
+        });
+
+        // footer
+        g.strokeStyle = "rgba(154,116,20,.3)"; g.beginPath(); g.moveTo(140, 1690); g.lineTo(W - 140, 1690); g.stroke();
+        const contact = [formatPhone(store.whatsapp || store.phone), store.instagram ? "@" + String(store.instagram).replace(/^@/, "") : ""].filter(Boolean).join("   ·   ");
+        text(contact, W / 2, 1752, `800 34px ${SANS}`, "#1c1917", "center", 1);
+        text(store.address ? store.address.slice(0, 90) : "Osmaniye", W / 2, 1800, `600 21px ${SANS}`, "#6b645c", "center");
+        text("Fiyatlar bilgi amaçlıdır · kesin fiyat için mağazamıza danışın", W / 2, 1838, `600 19px ${SANS}`, "#8a8170", "center");
+    }
+
+    function roundRect(x, y, w, h, r) {
+        g.beginPath();
+        g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+        g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
+    }
+
+    let pending = false;
+    const redraw = () => { if (pending) return; pending = true; requestAnimationFrame(() => { pending = false; draw(); }); };
+    draw();
+    startLive({ config, onStatus(s) { live = s === "live"; redraw(); }, onUpdate(q) { quotes = q; redraw(); } });
+    setInterval(redraw, 15000);
+
+    const fileName = () => { const d = istanbulNow().date; return `mercan-fiyatlar-${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}.png`; };
+    const blob = () => new Promise((res) => { draw(); canvas.toBlob(res, "image/png"); });
+
+    document.getElementById("download").addEventListener("click", async () => {
+        const b = await blob();
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(b); a.download = fileName(); a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    });
+    const shareBtn = document.getElementById("share");
+    shareBtn.addEventListener("click", async () => {
+        const b = await blob();
+        const file = new File([b], fileName(), { type: "image/png" });
+        if (navigator.canShare?.({ files: [file] })) {
+            try { await navigator.share({ files: [file], title: "Günün Altın Fiyatları" }); } catch {}
+        } else {
+            document.getElementById("download").click();
+        }
+    });
+</script>
+</body>
+</html>
