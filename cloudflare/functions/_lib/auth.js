@@ -1,5 +1,5 @@
-// Single-admin authentication: a password (secret ADMIN_PASSWORD) is exchanged for a
-// short-lived HMAC-signed token. No user data is stored.
+// Admin panel sessions: the owner's password (secret ADMIN_PASSWORD) or a staff account
+// (staff.js) is exchanged for a short-lived HMAC-signed token carrying who signed in.
 
 const TOKEN_TTL_MS = 12 * 60 * 60 * 1000;
 const MAX_FAILURES = 8;
@@ -41,8 +41,9 @@ export async function safeEqual(a, b) {
   return diff === 0;
 }
 
-export async function issueToken(env, now = Date.now()) {
-  const payload = enc.encode(JSON.stringify({ exp: now + TOKEN_TTL_MS }));
+/** [claims]: {} for the owner, {u, s} (username, session id) for staff. */
+export async function issueToken(env, now = Date.now(), claims = {}) {
+  const payload = enc.encode(JSON.stringify({ ...claims, exp: now + TOKEN_TTL_MS }));
   const sig = await crypto.subtle.sign("HMAC", await hmacKey(env), payload);
   return `${b64url(payload)}.${b64url(sig)}`;
 }
@@ -54,8 +55,8 @@ export async function verifyToken(env, token, now = Date.now()) {
     const payload = fromB64url(p);
     const ok = await crypto.subtle.verify("HMAC", await hmacKey(env), fromB64url(s), payload);
     if (!ok) return false;
-    const { exp } = JSON.parse(new TextDecoder().decode(payload));
-    return typeof exp === "number" && exp > now;
+    const claims = JSON.parse(new TextDecoder().decode(payload));
+    return typeof claims.exp === "number" && claims.exp > now ? claims : false;
   } catch {
     return false;
   }
@@ -71,7 +72,13 @@ export async function requireAdmin(request, env) {
   if (!env.ADMIN_PASSWORD) {
     return new Response(JSON.stringify({ error: "ADMIN_PASSWORD tanımlı değil" }), { status: 503 });
   }
-  if (await verifyToken(env, bearer(request))) return null;
+  const claims = await verifyToken(env, bearer(request));
+  // Staff tokens (with "u") are checked against the stored account by adminHandler (staff.js).
+  if (claims) {
+    if (!claims.u) return null;
+    const { adminUser } = await import("./staff.js");
+    if (await adminUser(request, env)) return null;
+  }
   return new Response(JSON.stringify({ error: "Oturum süresi doldu, tekrar giriş yapın" }), {
     status: 401,
     headers: { "Content-Type": "application/json; charset=utf-8" },

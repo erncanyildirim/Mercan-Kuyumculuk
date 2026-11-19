@@ -1,7 +1,7 @@
-import { esc, loadCatalog, loadConfig, startLive, whatsappHref } from "./live.js?v=202611191146";
-import { iconFor, iconSvg, siteContent } from "./site-defaults.js?v=202611191146";
-import { arrowIcon, initChrome, reveal } from "./chrome.js?v=202611191146";
-import { renderProducts } from "./products.js?v=202611191146";
+import { esc, loadCatalog, loadConfig, startLive, whatsappHref } from "./live.js?v=202611191200";
+import { iconFor, iconSvg, siteContent } from "./site-defaults.js?v=202611191200";
+import { arrowIcon, initChrome, reveal } from "./chrome.js?v=202611191200";
+import { renderProducts } from "./products.js?v=202611191200";
 
 const [config] = await Promise.all([loadConfig(), loadCatalog()]);
 const site = siteContent(config);

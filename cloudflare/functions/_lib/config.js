@@ -118,9 +118,41 @@ export function sanitizeConfig(input) {
     if (!isDefault) products[code] = entry;
   }
 
-  const doc = { schema: 1, feed, store, announcement, products };
+  const m = input.members ?? {};
+  const members = {
+    enabled: bool(m.enabled, false),
+    note: str(m.note, 160, "Üye bilgilendirme metni"),
+  };
+  const memberDeals = sanitizeDeals(input.memberDeals ?? {});
+
+  const doc = { schema: 1, feed, store, announcement, products, members, memberDeals };
   if (input.site != null) doc.site = sanitizeSite(input.site);
   return doc;
+}
+
+/** The document served to everyone: member deals are only sent to signed-in members. */
+export function publicConfig(doc) {
+  const { memberDeals, ...rest } = doc;
+  return rest;
+}
+
+/**
+ * Members-only prices, on top of the public price of each product:
+ * sell is lowered by [sell], buy is raised by [buy] (₺ or %, see [unit]).
+ */
+function sanitizeDeals(input) {
+  if (typeof input !== "object" || Array.isArray(input)) throw new ValidationError("Üye fiyatları geçersiz");
+  const out = {};
+  for (const [code, d] of Object.entries(input)) {
+    if (!CODE.test(code)) throw new ValidationError(`Geçersiz ürün kodu: ${code}`);
+    if (!d || typeof d !== "object") continue;
+    const unit = UNITS.has(d.unit) ? d.unit : "amount";
+    const limit = unit === "percent" ? 50 : 1_000_000;
+    const sell = num(d.sell, `${code} üye satış indirimi`, { min: 0, max: limit });
+    const buy = num(d.buy, `${code} üye alış farkı`, { min: 0, max: limit });
+    if (sell || buy) out[code] = { sell, buy, unit };
+  }
+  return out;
 }
 
 export async function readConfig(env) {

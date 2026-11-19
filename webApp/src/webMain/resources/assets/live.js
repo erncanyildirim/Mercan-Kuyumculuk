@@ -23,15 +23,54 @@ export const DEFAULT_STORE = {
 
 export async function loadConfig() {
   try {
-    const res = await fetch("/api/config", { cache: "no-cache" });
+    const [res, member] = await Promise.all([fetch("/api/config", { cache: "no-cache" }), loadMember()]);
     if (!res.ok) throw new Error(String(res.status));
     const doc = await res.json();
     const store = { ...DEFAULT_STORE, ...(doc.store || {}) };
     if (!store.instagram) store.instagram = DEFAULT_STORE.instagram;
-    return { ...doc, products: doc.products || {}, store };
+    // Signed-in members see their prices everywhere on the site.
+    return { ...doc, products: doc.products || {}, store, member, memberDeals: member?.deals || {} };
   } catch {
     return { store: DEFAULT_STORE, products: {}, feed: { url: DEFAULT_FEED, enabled: true } };
   }
+}
+
+// ---------- members ----------
+
+const MEMBER_KEY = "mercan.member.token";
+export const memberToken = () => { try { return localStorage.getItem(MEMBER_KEY); } catch { return null; } };
+export function setMemberToken(t) {
+  try { if (t) localStorage.setItem(MEMBER_KEY, t); else localStorage.removeItem(MEMBER_KEY); } catch {}
+}
+
+/** Calls a member API with the stored token; throws Error(message) on failure. */
+export async function memberApi(path, { method = "GET", body } = {}) {
+  const headers = {};
+  const t = memberToken();
+  if (t) headers.Authorization = `Bearer ${t}`;
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  const res = await fetch(path, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) setMemberToken(null);
+  if (!res.ok) throw new Error(data.error || `Sunucu hatası (${res.status})`);
+  if (data.token) setMemberToken(data.token);
+  return data;
+}
+
+/** The signed-in member's data ({member, deals, coupons, notices, unread}), or null. */
+export async function loadMember() {
+  if (!memberToken()) return null;
+  try { return await memberApi("/api/member/me"); } catch { return null; }
+}
+
+/** Members-only price on top of the public one: sell lowered, buy raised. */
+export function applyDeal(q, d) {
+  if (!q || !d) return q;
+  const pct = d.unit === "percent";
+  const out = { ...q, member: true };
+  if (d.sell && q.sell != null) out.sell = Math.max(0, pct ? q.sell * (1 - d.sell / 100) : q.sell - d.sell);
+  if (d.buy && q.buy != null) out.buy = pct ? q.buy * (1 + d.buy / 100) : q.buy + d.buy;
+  return out;
 }
 
 let catalogPromise = null;
@@ -104,6 +143,7 @@ export function price(raw, o = {}) {
 export function startLive({ config, onUpdate, onStatus = () => {} }) {
   const raw = {};
   const overrides = config.products || {};
+  const deals = config.memberDeals || {};
   const feedOn = config.feed?.enabled !== false;
   const last = new Map();
   let socket = null;
@@ -117,7 +157,7 @@ export function startLive({ config, onUpdate, onStatus = () => {} }) {
     const out = new Map();
     const codes = new Set([...Object.keys(raw), ...Object.keys(overrides)]);
     for (const code of codes) {
-      const q = price(feedOn ? raw[code] : null, overrides[code]);
+      const q = applyDeal(price(feedOn ? raw[code] : null, overrides[code]), deals[code]);
       if (!q) continue;
       const prev = last.get(code);
       const bt = prev ? dir(prev.buy, q.buy) : "";

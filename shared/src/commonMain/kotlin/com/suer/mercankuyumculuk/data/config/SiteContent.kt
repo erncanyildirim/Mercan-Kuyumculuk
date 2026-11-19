@@ -22,15 +22,12 @@ data class SiteContent(
             SiteCategory("ankara-bilezik", "Ankara Bilezik", "Geleneksel Ankara işi", inBar = true),
             SiteCategory("ray-bilezik", "Ray Bilezik", "Sade ve şık ray bilezikler", inBar = true),
             SiteCategory("trabzon-hasir", "Trabzon Hasır", "El örgüsü hasır bilezikler", inBar = true),
-            SiteCategory("kelepce", "Kelepçe", "Düz, taşlı ve burgu kelepçeler", inBar = true),
             SiteCategory("ziynet", "Ziynet Altını", "Çeyrek, yarım, tam, ata ve beşli"),
             SiteCategory("alyans", "Alyans", "Düz, taşlı ve desenli alyanslar"),
             SiteCategory("pirlanta", "Pırlanta & Tektaş", "Tektaş, beştaş ve tria"),
             SiteCategory("kolye", "Kolye", "Zarif ve iddialı kolyeler"),
             SiteCategory("kupe", "Küpe", "Halka, sallantılı ve vidalı"),
-            SiteCategory("bileklik", "Bileklik", "İnce ve kalın bileklikler"),
             SiteCategory("set", "Set & Takım", "Gelin ve söz setleri"),
-            SiteCategory("yatirim", "Yatırım Altını", "Gram ve külçe altın"),
         )
     }
 }

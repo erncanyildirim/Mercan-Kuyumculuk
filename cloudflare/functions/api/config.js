@@ -1,8 +1,8 @@
 // GET /api/config: the public configuration read by the Android, iOS and web apps.
-import { json, readConfig } from "../_lib/config.js";
+import { json, publicConfig, readConfig } from "../_lib/config.js";
 
 export async function onRequestGet({ request, env }) {
-  const doc = (await readConfig(env)) ?? { schema: 1, version: 0 };
+  const doc = publicConfig((await readConfig(env)) ?? { schema: 1, version: 0 });
   const etag = `"v${doc.version ?? 0}"`;
   const headers = {
     ETag: etag,

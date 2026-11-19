@@ -1,7 +1,7 @@
-import { DAY_LONG, esc, fmt, istanbulNow, loadCatalog, loadConfig, mapsEmbed, openState, productName, siteDecimals, startLive } from "./live.js?v=202611191146";
-import { siteContent, iconFor, iconSvg } from "./site-defaults.js?v=202611191146";
-import { arrowIcon, flash, initChrome, reveal } from "./chrome.js?v=202611191146";
-import { renderProducts } from "./products.js?v=202611191146";
+import { DAY_LONG, esc, fmt, istanbulNow, loadCatalog, loadConfig, mapsEmbed, openState, productName, siteDecimals, startLive } from "./live.js?v=202611191200";
+import { siteContent, iconFor, iconSvg } from "./site-defaults.js?v=202611191200";
+import { arrowIcon, flash, initChrome, reveal } from "./chrome.js?v=202611191200";
+import { renderProducts } from "./products.js?v=202611191200";
 
 const [config, catalog] = await Promise.all([loadConfig(), loadCatalog()]);
 const site = siteContent(config);

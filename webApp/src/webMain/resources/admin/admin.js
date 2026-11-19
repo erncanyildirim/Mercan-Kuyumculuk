@@ -1,7 +1,8 @@
 // Admin panel for the jeweler: edits the document served at /api/config.
 // Pricing math mirrors PricingEngine in shared/.../data/market/Pricing.kt.
 
-import { ensureSite, initSite, refreshGramPreviews, renderSite } from "./admin-site.js?v=202611191146";
+import { initTeam, refreshDealPreviews, refreshTeam, showTeamPanel } from "./admin-team.js?v=202611191200";
+import { ensureSite, initSite, refreshGramPreviews, renderSite } from "./admin-site.js?v=202611191200";
 
 const TOKEN_KEY = "mercan.admin.token";
 const DAY_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
@@ -28,7 +29,16 @@ const DEFAULTS = {
   },
   announcement: { enabled: false, text: "", style: "info" },
   products: {},
+  members: { enabled: false, note: "" },
+  memberDeals: {},
 };
+
+const USER_KEY = "mercan.admin.user";
+let user = null;
+try { user = JSON.parse(sessionStorage.getItem(USER_KEY) || "null"); } catch {}
+const can = (perm) => !!user && (user.owner || user.perms.includes(perm));
+/** Tabs that edit the saved settings document (the save bar belongs to these). */
+const CONFIG_TABS = new Set(["prices", "site", "store", "announcement", "memberPrices", "advanced"]);
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -38,6 +48,7 @@ let catalog = [];
 let config = structuredClone(DEFAULTS);
 let saved = "";
 let siteReady = false;
+let teamReady = false;
 const live = {};
 const view = { group: "", query: "", onlyChanged: false };
 
@@ -116,6 +127,7 @@ async function api(path, options = {}) {
 function showLogin(message = "") {
   token = null;
   sessionStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(USER_KEY);
   // Unsaved edits stay in memory and are shown again after logging back in.
   $("#editor-view").hidden = true;
   $("#logout").hidden = true;
@@ -128,6 +140,16 @@ async function showEditor() {
   $("#login-view").hidden = true;
   $("#editor-view").hidden = false;
   $("#logout").hidden = false;
+  const me = await api("/api/admin/me");
+  user = me.user;
+  sessionStorage.setItem(USER_KEY, JSON.stringify(user));
+  $("#who").textContent = user.owner ? "Mağaza sahibi" : `${user.name} · personel`;
+  for (const t of $$("[role=tab][data-tab]")) t.hidden = !can(t.dataset.perm);
+  for (const g of $$(".tabs.side .group")) {
+    let n = g.nextElementSibling, any = false;
+    while (n && !n.classList.contains("group")) { if (!n.hidden) any = true; n = n.nextElementSibling; }
+    g.hidden = !any;
+  }
   const [cat, doc] = await Promise.all([
     fetch("../catalog.json").then((r) => r.json()),
     api("/api/admin/config"),
@@ -141,12 +163,21 @@ async function showEditor() {
     initSite({ getConfig: () => config, onChange: updateDirty, getToken: () => token, catalog, toast, gramPrice: (code) => (code ? priced(code)?.sell ?? null : null) });
   }
   renderSite();
+  if (!teamReady) {
+    teamReady = true;
+    initTeam({ api, getConfig: () => config, onChange: updateDirty, catalog, priced, get user() { return user; }, toast, can, openTab });
+  }
   renderGroupChips();
   renderProducts();
   renderFields();
   renderHours();
   updateDirty();
   connectFeed();
+  let start = sessionStorage.getItem("mercan.admin.tab");
+  if (!start || !$(`[role=tab][data-tab="${start}"]`) || $(`[role=tab][data-tab="${start}"]`).hidden) {
+    start = $$("[role=tab][data-tab]").find((t) => !t.hidden)?.dataset.tab;
+  }
+  if (start) openTab(start);
 }
 
 function merge(base, doc) {
@@ -158,6 +189,8 @@ function merge(base, doc) {
     store: { ...base.store, ...(doc.store || {}) },
     announcement: { ...base.announcement, ...(doc.announcement || {}) },
     products: { ...(doc.products || {}) },
+    members: { ...base.members, ...(doc.members || {}) },
+    memberDeals: { ...(doc.memberDeals || {}) },
   };
 }
 
@@ -434,6 +467,7 @@ async function save() {
     if (normalized(config) === sent) {
       config = fresh;
       renderSite();
+      refreshTeam();
       renderProducts();
       renderFields();
       renderHours();
@@ -459,6 +493,7 @@ function discard() {
   config = merge(structuredClone(DEFAULTS), JSON.parse(saved));
   ensureSite(config);
   renderSite();
+  refreshTeam();
   renderProducts();
   renderFields();
   renderHours();
@@ -513,6 +548,7 @@ function connectFeed() {
         if (p) updateCard(card, p);
       }
       refreshGramPreviews();
+      refreshDealPreviews();
     }
   };
   socket.onclose = () => {
@@ -530,7 +566,7 @@ $("#login-form").addEventListener("submit", async (e) => {
   try {
     const { token: t } = await api("/api/admin/login", {
       method: "POST",
-      body: JSON.stringify({ password: $("#password").value }),
+      body: JSON.stringify({ username: $("#username").value.trim(), password: $("#password").value }),
     });
     token = t;
     sessionStorage.setItem(TOKEN_KEY, t);
@@ -570,12 +606,17 @@ $("#add-hours").addEventListener("click", () => {
   updateDirty();
 });
 
-for (const tab of $$("[role=tab][data-tab]")) {
-  tab.addEventListener("click", () => {
-    for (const t of $$("[role=tab][data-tab]")) t.setAttribute("aria-selected", String(t === tab));
-    for (const panel of $$("[data-panel]")) panel.hidden = panel.dataset.panel !== tab.dataset.tab;
-  });
+function openTab(name) {
+  const tab = $(`[role=tab][data-tab="${name}"]`);
+  if (!tab || tab.hidden) return;
+  for (const t of $$("[role=tab][data-tab]")) t.setAttribute("aria-selected", String(t === tab));
+  for (const panel of $$("[data-panel]")) panel.hidden = panel.dataset.panel !== name;
+  document.body.classList.toggle("no-save", !CONFIG_TABS.has(name));
+  try { sessionStorage.setItem("mercan.admin.tab", name); } catch {}
+  showTeamPanel(name);
 }
+
+for (const tab of $$("[role=tab][data-tab]")) tab.addEventListener("click", () => { openTab(tab.dataset.tab); window.scrollTo({ top: 0 }); });
 
 // Web sitesi tab: show one section at a time instead of one long page.
 const SUB_KEY = "mercan.admin.siteSection";

@@ -75,7 +75,7 @@ test("login requires JSON and weak ETags still match", async () => {
 test("tokens verify and expire", async () => {
   const e = env();
   const t = await issueToken(e, 1_000);
-  assert.equal(await verifyToken(e, t, 2_000), true);
+  assert.ok(await verifyToken(e, t, 2_000));
   assert.equal(await verifyToken(e, t, 1_000 + 13 * 3600 * 1000), false);
   assert.equal(await verifyToken({ ...e, SESSION_SECRET: "other" }, t, 2_000), false);
   assert.equal(await verifyToken(e, t.slice(0, -2) + "xx", 2_000), false);
