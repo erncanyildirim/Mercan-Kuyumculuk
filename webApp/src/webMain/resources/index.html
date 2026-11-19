@@ -17,7 +17,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@400;500;600&display=swap">
-    <link rel="stylesheet" href="/assets/site.css?v=202611182254">
+    <link rel="stylesheet" href="/assets/site.css?v=202611191146">
     <script type="application/ld+json">
     {"@context":"https://schema.org","@type":"JewelryStore","name":"Mercan Kuyumculuk","address":{"@type":"PostalAddress","streetAddress":"Alibeyli Mah. Atatürk Cad.","addressLocality":"Osmaniye","addressCountry":"TR"},"telephone":"+905436118088","url":"https://mercankuyumculukosmaniye.com.tr/","sameAs":["https://www.instagram.com/mercankuyumculuk80/"]}
     </script>
@@ -50,15 +50,6 @@
         </div>
     </section>
 
-    <section class="values-band">
-        <div class="wrap values">
-            <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span><b>Güvenilir alışveriş</b>Faturalı, damgalı ürünler</span></div>
-            <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg><span><b>Güncel fiyat</b>Piyasayla eş zamanlı</span></div>
-            <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 12h16M12 4v16"/><circle cx="12" cy="12" r="8.5"/></svg><span><b>Değerinde alım</b>Altınınızı nakit alıyoruz</span></div>
-            <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 8h16v12H4z"/><path d="M4 8l3-4h10l3 4M12 8v12"/></svg><span><b>Özel kutu</b>Hediyeye hazır paket</span></div>
-        </div>
-    </section>
-
     <section class="section" id="koleksiyon">
         <div class="wrap">
             <div class="head reveal">
@@ -79,24 +70,8 @@
         </div>
     </section>
 
-    <section class="section" id="fiyatlar">
+    <section class="section tight" id="hesapla">
         <div class="wrap">
-            <div class="head reveal">
-                <div><span class="eyebrow">Piyasa</span><h2>Güncel <em class="gold">fiyatlar</em></h2></div>
-                <p>Mağaza fiyatlarımız burada gördüğünüz fiyatlardır.</p>
-            </div>
-            <div class="board reveal" data-board>
-                <div class="board-top">
-                    <div class="tabs" role="tablist" data-tabs></div>
-                    <div class="status" data-status></div>
-                </div>
-                <table class="ptable">
-                    <thead><tr><th>Ürün</th><th>Alış</th><th>Satış</th><th class="col-chg">Değişim</th></tr></thead>
-                    <tbody data-rows></tbody>
-                </table>
-                <div class="board-foot"><span>Fiyatlar bilgi amaçlıdır</span><a class="link" href="/fiyatlar/">Tüm fiyatlar →</a></div>
-            </div>
-
             <form class="calc reveal" onsubmit="return false">
                 <h3>Altınınız bugün ne eder?</h3>
                 <label>Ürün <select data-calc-product></select></label>
@@ -152,10 +127,18 @@
                     <p>Güncel fiyatları takip edin, ürünlerin gram fiyatlarını görün, altın hesaplayıcıyı kullanın.</p>
                     <a class="btn" href="https://apps.apple.com/tr/app/mercan-kuyumculuk-osmaniye/id6822007593?l=tr" target="_blank" rel="noopener">App Store’dan indirin</a>
                 </div>
-                <div class="badges" aria-hidden="true">
-                    <div>Has Altın <b data-mini="ALTIN">—</b></div>
-                    <div>22 Ayar <b data-mini="AYAR22">—</b></div>
-                    <div>Çeyrek <b data-mini="CEYREK_YENI">—</b></div>
+                <div class="shots" aria-label="Uygulama ekran görüntüleri">
+                    <div class="shots-track" data-shots>
+                        <figure><img src="/assets/app/screen-1.jpg" alt="Canlı fiyatlar ekranı" loading="lazy" width="600" height="1305"><figcaption>Canlı fiyatlar</figcaption></figure>
+                        <figure><img src="/assets/app/screen-2.jpg" alt="Koleksiyon ekranı" loading="lazy" width="600" height="1305"><figcaption>Koleksiyon</figcaption></figure>
+                        <figure><img src="/assets/app/screen-3.jpg" alt="Altın hesaplayıcı ekranı" loading="lazy" width="600" height="1305"><figcaption>Hesaplayıcı</figcaption></figure>
+                        <figure><img src="/assets/app/screen-4.jpg" alt="Mağaza bilgileri ekranı" loading="lazy" width="600" height="1305"><figcaption>Mağaza</figcaption></figure>
+                    </div>
+                    <div class="shots-nav">
+                        <button type="button" data-shot-prev aria-label="Önceki ekran">‹</button>
+                        <div class="dots" data-shot-dots></div>
+                        <button type="button" data-shot-next aria-label="Sonraki ekran">›</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -163,6 +146,6 @@
 </main>
 
 <div id="chrome-bottom"></div>
-<script type="module" src="/assets/home.js?v=202611182254"></script>
+<script type="module" src="/assets/home.js?v=202611191146"></script>
 </body>
 </html>

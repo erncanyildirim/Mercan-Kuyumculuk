@@ -1,8 +1,7 @@
-import { DAY_LONG, esc, fmt, istanbulNow, loadCatalog, loadConfig, mapsEmbed, openState, productName, siteDecimals, startLive } from "./live.js?v=202611182254";
-import { siteContent, iconFor, iconSvg } from "./site-defaults.js?v=202611182254";
-import { arrowIcon, flash, initChrome, reveal } from "./chrome.js?v=202611182254";
-import { createBoard } from "./board.js?v=202611182254";
-import { renderProducts } from "./products.js?v=202611182254";
+import { DAY_LONG, esc, fmt, istanbulNow, loadCatalog, loadConfig, mapsEmbed, openState, productName, siteDecimals, startLive } from "./live.js?v=202611191146";
+import { siteContent, iconFor, iconSvg } from "./site-defaults.js?v=202611191146";
+import { arrowIcon, flash, initChrome, reveal } from "./chrome.js?v=202611191146";
+import { renderProducts } from "./products.js?v=202611191146";
 
 const [config, catalog] = await Promise.all([loadConfig(), loadCatalog()]);
 const site = siteContent(config);
@@ -118,7 +117,6 @@ const calc = (() => {
 const TODAY = [["ALTIN", "Has Altın", "24 ayar · gram"], ["AYAR22", "22 Ayar", "bilezik · gram"], ["KULCEALTIN", "Gram Altın", "külçe"], ["CEYREK_YENI", "Çeyrek Altın", "adet"]];
 const todayEl = document.querySelector("[data-today]");
 todayEl.innerHTML = TODAY.map(([c, n, h]) => `<div class="today-row" data-code="${c}"><span class="n">${n}<small>${h}</small></span><span class="b" data-b>—</span><span class="s" data-s>—</span></div>`).join("");
-const board = createBoard(document.querySelector("[data-board]"), catalog, { limit: 7, groups: [["GOLD", "Altın"], ["COINS", "Sarrafiye"], ["CURRENCY", "Döviz"]] });
 const updatedEl = document.querySelector("[data-updated]");
 
 startLive({
@@ -129,7 +127,6 @@ startLive({
     document.querySelector("[data-live-text]").textContent = s === "live" ? "Canlı" : s === "offline" ? "Bağlantı bekleniyor" : "Bağlanıyor";
   },
   onUpdate(quotes) {
-    board.update(quotes);
     calc.update(quotes);
     products?.update(quotes);
     for (const row of todayEl.children) {
@@ -141,13 +138,36 @@ startLive({
       if (s.textContent !== t) { const had = s.textContent !== "—"; s.textContent = t; if (had && q.changed) flash(s, q.sellTick); }
       row.querySelector("[data-b]").textContent = fmt(q.buy, d);
     }
-    for (const el of document.querySelectorAll("[data-mini]")) {
-      const q = quotes.get(el.dataset.mini);
-      if (q) el.textContent = `${fmt(q.sell, siteDecimals(catalog.get(el.dataset.mini)))} ₺`;
-    }
     const { date } = istanbulNow();
     updatedEl.textContent = `Son güncelleme ${String(date.getUTCHours()).padStart(2, "0")}:${String(date.getUTCMinutes()).padStart(2, "0")}:${String(date.getUTCSeconds()).padStart(2, "0")}`;
   },
 });
+
+// App screenshots: swipe or use the arrows; advances on its own until the visitor touches it.
+(() => {
+  const track = document.querySelector("[data-shots]");
+  if (!track) return;
+  const shots = [...track.children];
+  const dots = document.querySelector("[data-shot-dots]");
+  dots.innerHTML = shots.map(() => "<i></i>").join("");
+  let index = 0, auto = true;
+  const go = (i) => {
+    index = (i + shots.length) % shots.length;
+    track.scrollTo({ left: shots[index].offsetLeft - (track.clientWidth - shots[index].clientWidth) / 2, behavior: "smooth" });
+  };
+  track.addEventListener("scroll", () => {
+    const mid = track.scrollLeft + track.clientWidth / 2;
+    let best = 0;
+    shots.forEach((s, i) => { if (Math.abs(s.offsetLeft + s.clientWidth / 2 - mid) < Math.abs(shots[best].offsetLeft + shots[best].clientWidth / 2 - mid)) best = i; });
+    index = best;
+    [...dots.children].forEach((d, i) => d.classList.toggle("on", i === best));
+  }, { passive: true });
+  const stop = () => { auto = false; };
+  track.addEventListener("pointerdown", stop);
+  document.querySelector("[data-shot-prev]").addEventListener("click", () => { stop(); go(index - 1); });
+  document.querySelector("[data-shot-next]").addEventListener("click", () => { stop(); go(index + 1); });
+  dots.children[0].classList.add("on");
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) setInterval(() => { if (auto) go(index + 1); }, 3500);
+})();
 
 reveal();

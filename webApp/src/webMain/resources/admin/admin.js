@@ -1,7 +1,7 @@
 // Admin panel for the jeweler: edits the document served at /api/config.
 // Pricing math mirrors PricingEngine in shared/.../data/market/Pricing.kt.
 
-import { ensureSite, initSite, refreshGramPreviews, renderSite } from "./admin-site.js?v=202611182254";
+import { ensureSite, initSite, refreshGramPreviews, renderSite } from "./admin-site.js?v=202611191146";
 
 const TOKEN_KEY = "mercan.admin.token";
 const DAY_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];

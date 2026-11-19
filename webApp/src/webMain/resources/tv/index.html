@@ -240,6 +240,7 @@
                     raw[q.code || k] = { buy: num(q.alis), sell: num(q.satis), close: num(q.kapanis) };
                 }
                 render();
+                save();
             }
         };
         socket.onclose = function () { socket = null; setTimeout(connect, Math.min(30000, 1000 * Math.pow(2, retry++))); };
@@ -265,17 +266,42 @@
         $("stage").style.transform = "translate(" + p[0] + "px," + p[1] + "px)";
     }
 
+    // Last config, catalog and prices are kept on the TV so the board fills instantly on start
+    // (the live feed needs a few seconds to connect), then the live feed takes over.
+    var CACHE = "mercan.tv.cache.v1", savedAt = 0, started = false;
+    function save() {
+        if (Date.now() - savedAt < 5000) return;
+        savedAt = Date.now();
+        try { localStorage.setItem(CACHE, JSON.stringify({ config: config, catalog: catalog, raw: raw, at: lastData })); } catch (e) {}
+    }
+    function restore() {
+        try {
+            var c = JSON.parse(localStorage.getItem(CACHE) || "null");
+            if (!c || !c.raw) return false;
+            config = c.config || config; catalog = c.catalog || {}; raw = c.raw; lastData = c.at || 0;
+            return true;
+        } catch (e) { return false; }
+    }
+
     function start() {
+        if (started) { applyConfig(); return; }
+        started = true;
         $("phone").textContent = formatPhone(config.store && (config.store.phone || config.store.whatsapp));
-        if (config.site && config.site.tv && config.site.tv.length) tiles = config.site.tv;
-        build();
-        render();
+        applyConfig();
         connect();
         tick();
         setInterval(tick, 1000);
         setInterval(shift, 3 * 60000);
     }
 
+    function applyConfig() {
+        $("phone").textContent = formatPhone(config.store && (config.store.phone || config.store.whatsapp));
+        var next = config.site && config.site.tv && config.site.tv.length ? config.site.tv : DEFAULT_TILES;
+        if (!els.length || JSON.stringify(next) !== JSON.stringify(tiles)) { tiles = next; shown = {}; build(); }
+        render();
+    }
+
+    if (restore()) start();
     var waiting = 2;
     function ready() { if (--waiting === 0) start(); }
     getJSON("/api/config", function (doc) {
