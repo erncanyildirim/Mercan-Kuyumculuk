@@ -1,7 +1,7 @@
-import { esc, loadCatalog, loadConfig, startLive, whatsappHref } from "./live.js?v=202611191210";
-import { iconFor, iconSvg, siteContent } from "./site-defaults.js?v=202611191210";
-import { arrowIcon, initChrome, reveal } from "./chrome.js?v=202611191210";
-import { renderProducts } from "./products.js?v=202611191210";
+import { esc, loadCatalog, loadConfig, startLive, whatsappHref } from "./live.js?v=202611191643";
+import { iconFor, iconSvg, siteContent } from "./site-defaults.js?v=202611191643";
+import { arrowIcon, initChrome, reveal } from "./chrome.js?v=202611191643";
+import { renderProducts } from "./products.js?v=202611191643";
 
 const [config] = await Promise.all([loadConfig(), loadCatalog()]);
 const site = siteContent(config);
@@ -20,7 +20,7 @@ document.querySelector("[data-chips]").innerHTML =
 if (cat) {
   document.title = `${cat.title} · Mercan Kuyumculuk Osmaniye`;
   document.querySelector("[data-title]").textContent = cat.title;
-  if (cat.subtitle) document.querySelector("[data-sub]").textContent = `${cat.subtitle}. Gramını seçin, güncel fiyatını görün; beğendiğiniz modeli WhatsApp’tan sorun.`;
+  if (cat.subtitle) document.querySelector("[data-sub]").textContent = `${cat.subtitle}. Beğendiğiniz modelin gramını seçip WhatsApp’tan sorun, güncel fiyatı hemen iletelim.`;
 }
 
 const shown = cat ? items.filter((p) => p.categoryId === cat.id) : items;

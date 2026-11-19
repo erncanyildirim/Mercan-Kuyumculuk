@@ -1,7 +1,7 @@
 // "Web sitesi" tab of the admin panel: categories, products (with photos), TV board and story card.
 // Edits config.site in place; texts use the generic [data-field] binding in admin.js.
-import { DEFAULT_SITE, GRAM_PRICES, gramLabel } from "../assets/site-defaults.js?v=202611191210";
-import { esc } from "../assets/live.js?v=202611191210";
+import { DEFAULT_SITE, GRAM_PRICES, gramLabel } from "../assets/site-defaults.js?v=202611191643";
+import { esc } from "../assets/live.js?v=202611191643";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -42,7 +42,7 @@ export function initSite(options) {
     if (!s.categories.length) return ctx.toast("Önce bir kategori ekleyin");
     if (s.items.length >= MAX.items) return ctx.toast(`En fazla ${MAX.items} ürün olabilir`);
     const categoryId = itemFilter || s.categories[0].id;
-    s.items.unshift({ id: newId("urun", s.items), categoryId, name: "Yeni ürün", detail: "", description: "", image: "", visible: true, grams: [], priceCode: "AYAR22" });
+    s.items.unshift({ id: newId("urun", s.items), categoryId, name: "Yeni ürün", detail: "", description: "", image: "", visible: true, grams: [], priceCode: "" });
     changed();
     renderSite();
     $("#items input[data-k=name]")?.select();
@@ -204,15 +204,7 @@ function renderItems() {
           <label>Ürün adı <input data-k="name" maxlength="60" required></label>
           <label>Kategori <select data-k="categoryId" data-rerender>${options}</select></label>
         </div>
-        <div class="two">
-          <label>Fiyat hesabı
-            <select data-k="priceCode" data-rerender>
-              <option value="">Fiyat gösterme</option>
-              ${GRAM_PRICES.map(([c, t]) => `<option value="${c}">${t} gram fiyatından</option>`).join("")}
-            </select>
-          </label>
-          <label>Gram seçenekleri <input data-grams placeholder="örn. 10; 15; 20; 22,5" inputmode="decimal"></label>
-        </div>
+        <label>Gram seçenekleri <input data-grams placeholder="örn. 10; 15; 20; 22,5" inputmode="decimal"></label>
         <p class="muted small-text" data-gram-preview></p>
         <label>Kısa bilgi <input data-k="detail" maxlength="60" placeholder="örn. 22 ayar · kilitli"></label>
         <label>Açıklama <textarea data-k="description" rows="2" maxlength="400"></textarea></label>
@@ -261,12 +253,9 @@ function bindGrams(card, p) {
   p.priceCode ??= "";
   input.value = p.grams.map((g) => String(g).replace(".", ",")).join("; ");
   const show = () => {
-    const unit = ctx.gramPrice?.(p.priceCode);
-    const list = p.grams.map(gramLabel).join(" · ");
-    if (!p.grams.length) preview.textContent = "Gramları noktalı virgülle yazın (örn. 10; 15; 22,5). Müşteri sitede ve uygulamada gramı seçer, fiyat gram fiyatınıza göre hesaplanır.";
-    else if (!p.priceCode) preview.textContent = `Seçenekler: ${list} (fiyat gösterilmez)`;
-    else if (unit == null) preview.textContent = `Seçenekler: ${list} · fiyat bekleniyor`;
-    else preview.textContent = "Şu anki fiyat: " + p.grams.map((g) => `${gramLabel(g)} = ${Math.round(g * unit).toLocaleString("tr-TR")} ₺`).join(" · ");
+    preview.textContent = p.grams.length
+      ? `Sitede ve uygulamada görünecek: ${p.grams.map(gramLabel).join(" · ")}`
+      : "Gramları noktalı virgülle yazın (örn. 10; 15; 22,5). Müşteri sitede ve uygulamada gram seçeneklerini görür; fiyat gösterilmez.";
   };
   input.addEventListener("input", () => {
     const grams = parseGrams(input.value);

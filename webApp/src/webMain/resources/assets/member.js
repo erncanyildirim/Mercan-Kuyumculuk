@@ -1,7 +1,7 @@
 // /uye/: sign in or sign up; members see their coupons, messages, member prices and account.
-import { esc, fmt, loadCatalog, loadConfig, memberApi, productName, setMemberToken, siteDecimals, startLive } from "./live.js?v=202611191210";
-import { siteContent } from "./site-defaults.js?v=202611191210";
-import { initChrome } from "./chrome.js?v=202611191210";
+import { esc, fmt, loadCatalog, loadConfig, memberApi, productName, setMemberToken, siteDecimals, startLive } from "./live.js?v=202611191643";
+import { siteContent } from "./site-defaults.js?v=202611191643";
+import { initChrome } from "./chrome.js?v=202611191643";
 
 const [config, catalog] = await Promise.all([loadConfig(), loadCatalog()]);
 initChrome({ config, site: siteContent(config), current: "member" });

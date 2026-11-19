@@ -120,7 +120,7 @@ private fun CategoryGrid(categories: List<SiteCategory>, countOf: (String) -> In
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "Bir kategori seçin; gramını seçtiğiniz ürünün fiyatı güncel gram fiyatımızla hesaplanır.",
+                    "Bir kategori seçin; beğendiğiniz modelin gramını seçip WhatsApp’tan fiyat sorun.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = c.textMuted,
                 )
@@ -227,8 +227,6 @@ private fun ItemCard(item: SiteItem, state: MarketState, onAsk: (Double?) -> Uni
     val c = AppTheme.colors
     var gram by rememberSaveable(item.id) { mutableStateOf(item.grams.firstOrNull()) }
     LaunchedEffect(item.grams) { if (gram !in item.grams) gram = item.grams.firstOrNull() }
-    val unit = state[item.priceCode]?.sell
-    val price = GramPrices.price(item, gram, unit)
 
     Column(
         Modifier
@@ -240,7 +238,7 @@ private fun ItemCard(item: SiteItem, state: MarketState, onAsk: (Double?) -> Uni
             if (item.image.isNotBlank()) MediaImage(item.image, Modifier.fillMaxSize()) else Monogram(item.name)
         }
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            val meta = item.detail.ifBlank { if (item.priceCode.isNotBlank() && item.grams.isNotEmpty()) "${GramPrices.label(item.priceCode)} gram fiyatından" else "" }
+            val meta = item.detail
             if (meta.isNotBlank()) Text(meta.uppercase(), style = MaterialTheme.typography.labelSmall, color = c.goldInk, maxLines = 2)
             Text(item.name, style = MaterialTheme.typography.titleSmall, color = c.text)
             if (item.description.isNotBlank()) Text(item.description, style = MaterialTheme.typography.bodySmall, color = c.textMuted, maxLines = 3, overflow = TextOverflow.Ellipsis)
@@ -264,17 +262,7 @@ private fun ItemCard(item: SiteItem, state: MarketState, onAsk: (Double?) -> Uni
                     }
                 }
             }
-            if (item.priceCode.isNotBlank() && item.grams.isNotEmpty()) {
-                Row(verticalAlignment = Alignment.Bottom) {
-                    Text(
-                        price?.let { TrFormat.number(it, 0) + " ₺" } ?: "—",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = c.text,
-                        modifier = Modifier.weight(1f),
-                    )
-                    gram?.let { Text(gramLabel(it), style = MaterialTheme.typography.bodySmall, color = c.textMuted) }
-                }
-            } else if (item.grams.size == 1) {
+            if (item.grams.size == 1) {
                 Text(gramLabel(item.grams[0]), style = MaterialTheme.typography.titleMedium, color = c.text)
             }
             PillButton("WhatsApp’tan sor", Modifier.fillMaxWidth()) { onAsk(gram) }

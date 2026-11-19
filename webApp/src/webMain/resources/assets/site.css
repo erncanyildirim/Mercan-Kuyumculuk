@@ -58,7 +58,7 @@ em.gold { font-style: italic; color: var(--gold); }
 /* ---------- header ---------- */
 .announce { background: var(--ink); color: #f5efe4; font-size: 13.5px; text-align: center; padding: 9px 16px; }
 .site-header { position: sticky; top: 0; z-index: 30; background: rgba(250, 248, 244, .92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
-.header-row { display: flex; align-items: center; gap: 28px; height: 76px; }
+.header-row { display: flex; align-items: center; gap: 28px; height: 76px; position: relative; z-index: 3; }
 .brand { display: flex; align-items: center; gap: 12px; flex: none; }
 .brand img { width: 46px; height: auto; }
 .brand-name { font: 600 25px/1 var(--serif); letter-spacing: .01em; color: var(--ink); }
@@ -94,7 +94,7 @@ em.gold { font-style: italic; color: var(--gold); }
 .burger span { display: block; width: 18px; height: 1.5px; background: var(--ink); margin: 4px auto; }
 
 /* bangle bar: quiet text links under the header */
-.bar-row { border-top: 1px solid var(--line); }
+.bar-row { border-top: 1px solid var(--line); position: relative; z-index: 1; }
 .bangles { display: flex; gap: 30px; overflow-x: auto; scrollbar-width: none; height: 46px; align-items: center; justify-content: center; }
 .bangles::-webkit-scrollbar { display: none; }
 .bangles a { flex: none; position: relative; font-size: 13px; font-weight: 500; letter-spacing: .04em; color: var(--ink-2); padding: 12px 0; transition: color .2s; }
@@ -174,9 +174,9 @@ em.gold { font-style: italic; color: var(--gold); }
 .cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
 .cat { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; transition: transform .35s var(--ease), box-shadow .35s var(--ease), border-color .35s; }
 .cat:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--line-2); }
-.cat .art { aspect-ratio: 4 / 3; display: grid; place-items: center; background: radial-gradient(circle at 50% 40%, #fff 0%, var(--paper-2) 75%); color: var(--gold); overflow: hidden; }
+.cat .art { aspect-ratio: 4 / 3; display: grid; place-items: center; background: #fff; border-bottom: 1px solid var(--line); color: var(--gold); overflow: hidden; }
 .cat .art svg { width: 34%; stroke-width: .9; transition: transform .6s var(--ease); }
-.cat .art img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease); }
+.cat .art img { width: 100%; height: 100%; object-fit: contain; background: #fff; transition: transform .6s var(--ease); }
 .cat:hover .art svg, .cat:hover .art img { transform: scale(1.05); }
 .cat .t { padding: 16px 18px 18px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .cat h3 { margin: 0; font: 600 22px/1.15 var(--serif); }
@@ -190,7 +190,7 @@ em.gold { font-style: italic; color: var(--gold); }
 .item { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; display: flex; flex-direction: column; transition: box-shadow .35s var(--ease), transform .35s var(--ease); }
 .item:hover { box-shadow: var(--shadow); transform: translateY(-3px); }
 .item .ph { aspect-ratio: 1; background: var(--paper-2); overflow: hidden; display: grid; place-items: center; color: var(--gold); }
-.item .ph img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s var(--ease); }
+.item .ph img { width: 100%; height: 100%; object-fit: contain; background: #fff; transition: transform .7s var(--ease); }
 .item:hover .ph img { transform: scale(1.04); }
 .item .ph svg { width: 34%; stroke-width: .9; }
 .item .body { padding: 18px 18px 20px; display: grid; gap: 8px; flex: 1; align-content: start; }
