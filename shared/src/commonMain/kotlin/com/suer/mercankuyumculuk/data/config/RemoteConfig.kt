@@ -17,6 +17,14 @@ data class RemoteConfig(
     val announcement: Announcement = Announcement(),
     val products: Map<String, ProductOverride> = emptyMap(),
     val site: SiteContent = SiteContent(),
+    val members: MembersConfig = MembersConfig(),
+)
+
+/** Customer accounts (üyelik) switched on by the jeweler, with a short note for non-members. */
+@Serializable
+data class MembersConfig(
+    val enabled: Boolean = false,
+    val note: String = "",
 )
 
 @Serializable

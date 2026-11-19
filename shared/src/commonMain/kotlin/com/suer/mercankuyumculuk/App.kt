@@ -30,7 +30,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.suer.mercankuyumculuk.ui.account.AccountScreen
 import com.suer.mercankuyumculuk.ui.calc.CalculatorScreen
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import kotlinx.coroutines.delay
 import com.suer.mercankuyumculuk.ui.collection.CollectionScreen
 import com.suer.mercankuyumculuk.ui.components.BrandMark
 import com.suer.mercankuyumculuk.ui.icons.AppIcons
@@ -59,6 +65,22 @@ fun App() {
     val state by market.state.collectAsStateWithLifecycle()
     val favorites by prefs.favorites.collectAsStateWithLifecycle()
     val calcProduct by prefs.calcProduct.collectAsStateWithLifecycle()
+    val members = AppGraph.members
+    val member by members.session.collectAsStateWithLifecycle()
+    var showAccount by rememberSaveable { mutableStateOf(false) }
+
+    // Member prices, coupons and messages: refreshed on start and every two minutes while visible.
+    var visible by remember { mutableStateOf(false) }
+    LifecycleStartEffect(members) {
+        visible = true
+        onStopOrDispose { visible = false }
+    }
+    LaunchedEffect(visible, member?.token) {
+        while (visible && member != null) {
+            members.refresh()
+            delay(120_000)
+        }
+    }
 
     // Keep the live connection open only while the app is visible.
     LifecycleStartEffect(market) {
@@ -90,12 +112,26 @@ fun App() {
                     modifier = modifier,
                 )
                 Destination.STORE -> StoreScreen(state.store, modifier)
-                Destination.SETTINGS -> SettingsScreen(
-                    onShareApp = {
-                        share("${state.store.name} ${state.store.city} canlı altın ve döviz fiyatları: ${AppLinks.SITE_URL}")
-                    },
-                    modifier = modifier,
-                )
+                Destination.SETTINGS -> if (showAccount) {
+                    AccountScreen(
+                        session = member,
+                        membersEnabled = state.membersEnabled,
+                        memberNote = state.memberNote,
+                        repo = members,
+                        onBack = { showAccount = false },
+                        modifier = modifier,
+                    )
+                } else {
+                    SettingsScreen(
+                        onShareApp = {
+                            share("${state.store.name} ${state.store.city} canlı altın ve döviz fiyatları: ${AppLinks.SITE_URL}")
+                        },
+                        member = member,
+                        membersEnabled = state.membersEnabled,
+                        onOpenAccount = { showAccount = true },
+                        modifier = modifier,
+                    )
+                }
             }
         }
 
@@ -110,7 +146,7 @@ fun App() {
                             NavigationRailItem(
                                 selected = d == destination,
                                 onClick = { destination = d },
-                                icon = { Icon(d.icon, contentDescription = null) },
+                                icon = { NavIcon(d, member?.unread ?: 0) },
                                 label = { Text(d.label) },
                                 colors = NavigationRailItemDefaults.colors(
                                     selectedIconColor = c.onGold,
@@ -133,7 +169,7 @@ fun App() {
                                 NavigationBarItem(
                                     selected = d == destination,
                                     onClick = { destination = d },
-                                    icon = { Icon(d.icon, contentDescription = null) },
+                                    icon = { NavIcon(d, member?.unread ?: 0) },
                                     label = { Text(d.label) },
                                     colors = NavigationBarItemDefaults.colors(
                                         selectedIconColor = c.onGold,
@@ -156,5 +192,14 @@ fun App() {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun NavIcon(d: Destination, unread: Int) {
+    if (d == Destination.SETTINGS && unread > 0) {
+        BadgedBox(badge = { Badge { Text(unread.toString()) } }) { Icon(d.icon, contentDescription = "${d.label}, $unread yeni bildirim") }
+    } else {
+        Icon(d.icon, contentDescription = null)
     }
 }

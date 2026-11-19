@@ -1,6 +1,6 @@
 // Membership side of the admin panel: dashboard, till (coupon use), members, member prices,
 // coupons, notifications, staff with permissions, and the activity log.
-import { esc } from "../assets/live.js?v=202611191200";
+import { esc } from "../assets/live.js?v=202611191210";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];

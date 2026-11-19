@@ -40,6 +40,9 @@ const val APP_VERSION = "1.0"
 @Composable
 fun SettingsScreen(
     onShareApp: () -> Unit,
+    member: com.suer.mercankuyumculuk.data.member.MemberSession?,
+    membersEnabled: Boolean,
+    onOpenAccount: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val c = AppTheme.colors
@@ -68,6 +71,31 @@ fun SettingsScreen(
                 modifier = Modifier.padding(start = 4.dp, top = 4.dp).semantics { heading() },
             )
 
+            if (membersEnabled || member != null) {
+                Label("Üyelik")
+                AppCard(Modifier.fillMaxWidth(), highlighted = member == null) {
+                    Row(
+                        Modifier.fillMaxWidth().clickable(onClick = onOpenAccount).padding(horizontal = 16.dp, vertical = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(AppIcons.Diamond, contentDescription = null, tint = c.goldInk, modifier = Modifier.size(24.dp))
+                        Spacer(Modifier.width(14.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(if (member == null) "Üye girişi / Üye ol" else member.member.name, style = MaterialTheme.typography.titleSmall, color = c.text)
+                            Text(
+                                if (member == null) "Üyelere özel fiyat, kupon ve kampanyalar"
+                                else listOfNotNull(
+                                    "${member.usableCoupons} kupon".takeIf { member.usableCoupons > 0 },
+                                    "${member.unread} yeni bildirim".takeIf { member.unread > 0 },
+                                ).joinToString(" · ").ifBlank { "Kuponlarım, bildirimlerim ve hesabım" },
+                                style = MaterialTheme.typography.bodySmall, color = if (member != null && member.unread > 0) c.down else c.textMuted,
+                            )
+                        }
+                        Icon(AppIcons.ChevronRight, contentDescription = null, tint = c.textMuted)
+                    }
+                }
+            }
+
             Label("Diğer")
             AppCard(Modifier.fillMaxWidth()) {
                 Column {
@@ -91,7 +119,7 @@ fun SettingsScreen(
                         color = c.textMuted,
                     )
                     Text(
-                        "Uygulama üyelik istemez, kişisel veri toplamaz. Favorileriniz yalnızca bu cihazda saklanır.",
+                        "Üyelik isteğe bağlıdır. Üye olursanız adınız ve telefon numaranız yalnızca üyelik, kupon ve bildirimler için saklanır; üyeliğinizi Hesabım bölümünden silebilirsiniz. Favorileriniz yalnızca bu cihazda saklanır.",
                         style = MaterialTheme.typography.bodySmall,
                         color = c.textMuted,
                     )

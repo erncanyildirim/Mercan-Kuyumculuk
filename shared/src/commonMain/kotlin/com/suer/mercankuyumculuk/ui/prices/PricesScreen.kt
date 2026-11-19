@@ -235,6 +235,10 @@ private fun HeroCard(
                     color = c.goldInk,
                     modifier = Modifier.semantics { heading() },
                 )
+                if (quote?.member == true) {
+                    Spacer(Modifier.width(8.dp))
+                    VariantBadge("Üye fiyatı")
+                }
                 Spacer(Modifier.weight(1f))
                 if (quote != null) ChangeChip(quote.changePct)
             }
@@ -390,6 +394,7 @@ private fun PriceRow(quote: PricedQuote, favorite: Boolean, onToggleFavorite: ()
                     Spacer(Modifier.width(6.dp))
                 }
                 val hint = when {
+                    quote.member -> "Üye fiyatı"
                     quote.source == PriceSource.FIXED -> "Mağaza"
                     variant == null && p.family == null -> p.unitHint
                     else -> null

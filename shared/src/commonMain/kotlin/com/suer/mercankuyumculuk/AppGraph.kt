@@ -1,6 +1,7 @@
 package com.suer.mercankuyumculuk
 
 import com.suer.mercankuyumculuk.data.MediaLoader
+import com.suer.mercankuyumculuk.data.member.MemberRepository
 import com.suer.mercankuyumculuk.data.Preferences
 import com.suer.mercankuyumculuk.data.config.ConfigRepository
 import com.suer.mercankuyumculuk.data.createHttpClient
@@ -43,8 +44,12 @@ object AppGraph {
         MediaLoader(httpClient, platformConfigEndpoints().map { it.removeSuffix("/api/config") })
     }
 
+    val members: MemberRepository by lazy {
+        MemberRepository(httpClient, store, platformConfigEndpoints().map { it.removeSuffix("/api/config") })
+    }
+
     val market: MarketRepository by lazy {
-        MarketRepository(HaremFeed(httpClient), configRepository, store, scope)
+        MarketRepository(HaremFeed(httpClient), configRepository, store, scope, memberSession = members.session)
     }
 }
 

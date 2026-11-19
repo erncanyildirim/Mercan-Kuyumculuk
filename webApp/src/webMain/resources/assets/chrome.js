@@ -1,6 +1,6 @@
 // Shared page chrome: header with mega menu, bangle bar, mobile drawer, footer, WhatsApp button.
-import { esc, fillStore, whatsappHref } from "./live.js?v=202611191200";
-import { iconFor, iconSvg } from "./site-defaults.js?v=202611191200";
+import { esc, fillStore, whatsappHref } from "./live.js?v=202611191210";
+import { iconFor, iconSvg } from "./site-defaults.js?v=202611191210";
 
 const I = {
   user: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',

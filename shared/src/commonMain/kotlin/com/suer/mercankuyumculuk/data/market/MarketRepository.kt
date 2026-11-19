@@ -6,6 +6,7 @@ import com.suer.mercankuyumculuk.data.config.Announcement
 import com.suer.mercankuyumculuk.data.config.ConfigRepository
 import com.suer.mercankuyumculuk.data.config.RemoteConfig
 import com.suer.mercankuyumculuk.data.config.SiteContent
+import com.suer.mercankuyumculuk.data.member.MemberSession
 import com.suer.mercankuyumculuk.data.config.StoreInfo
 import com.suer.mercankuyumculuk.data.harem.HaremFeed
 import com.suer.mercankuyumculuk.data.harem.RawQuote
@@ -44,6 +45,11 @@ data class MarketState(
     val store: StoreInfo = StoreInfo(),
     val announcement: Announcement = Announcement(),
     val site: SiteContent = SiteContent(),
+    /** The jeweler offers accounts (üyelik). */
+    val membersEnabled: Boolean = false,
+    val memberNote: String = "",
+    /** Prices on screen include the signed-in member's prices. */
+    val memberPricing: Boolean = false,
 ) {
     private val byCode: Map<String, PricedQuote> by lazy { quotes.associateBy { it.code } }
 
@@ -85,7 +91,10 @@ class MarketRepository(
     private val store: LocalStore,
     private val scope: CoroutineScope,
     private val clock: () -> Long = TrTime::nowMillis,
+    private val memberSession: StateFlow<MemberSession?> = MutableStateFlow(null),
 ) {
+    private val configAndMember = combine(configRepository.config, memberSession) { c, m -> c to m }
+
     private val raw = MutableStateFlow<Map<String, RawQuote>>(loadCachedQuotes())
     private val connection = MutableStateFlow(ConnectionStatus.CONNECTING)
     private val lastMessageAt = MutableStateFlow<Long?>(null)
@@ -97,9 +106,9 @@ class MarketRepository(
     private var lastPersistAt = 0L
 
     val state: StateFlow<MarketState> = combine(
-        raw, configRepository.config, connection, lastMessageAt, fromCache,
-    ) { quotes, config, status, lastAt, cached ->
-        build(quotes, config, status, lastAt, cached)
+        raw, configAndMember, connection, lastMessageAt, fromCache,
+    ) { quotes, (config, member), status, lastAt, cached ->
+        build(quotes, config, member, status, lastAt, cached)
     }.stateIn(scope, SharingStarted.Eagerly, MarketState())
 
     val isRunning: Boolean get() = job?.isActive == true
@@ -164,6 +173,7 @@ class MarketRepository(
     private fun build(
         quotes: Map<String, RawQuote>,
         config: RemoteConfig,
+        member: MemberSession?,
         status: ConnectionStatus,
         lastAt: Long?,
         cached: Boolean,
@@ -172,8 +182,10 @@ class MarketRepository(
         var newest: Long? = null
         // With the feed switched off only the jeweler's fixed prices are shown.
         val live = if (config.feed.enabled) quotes else emptyMap()
+        val memberPricing = config.members.enabled && member?.enabled == true
         for (product in Catalog.products) {
-            val q = PricingEngine.price(product, live[product.code], config.products[product.code]) ?: continue
+            val base = PricingEngine.price(product, live[product.code], config.products[product.code]) ?: continue
+            val q = if (memberPricing) MemberPricing.apply(base, member?.deals?.get(product.code)) else base
             priced += tickTracker.track(q)
             val t = q.updatedAtMillis
             if (t != null && (newest == null || t > newest)) newest = t
@@ -187,6 +199,9 @@ class MarketRepository(
             store = config.store,
             announcement = config.announcement,
             site = config.site,
+            membersEnabled = config.members.enabled,
+            memberNote = config.members.note,
+            memberPricing = memberPricing,
         )
     }
 

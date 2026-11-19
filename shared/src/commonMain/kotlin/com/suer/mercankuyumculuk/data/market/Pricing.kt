@@ -25,6 +25,8 @@ data class PricedQuote(
     val sellTick: Tick = Tick.NONE,
     /** Increments on every price change; drives the flash animation. */
     val tickSeq: Long = 0,
+    /** The signed-in member's price (better than the public one). */
+    val member: Boolean = false,
 ) {
     val code: String get() = product.code
 }
@@ -96,6 +98,17 @@ object PricingEngine {
     fun changePct(current: Double?, close: Double?): Double? {
         if (current == null || close == null || close <= 0) return null
         return (current - close) / close * 100.0
+    }
+}
+
+/** Members-only prices on top of the public price: sell lowered, buy raised (same as applyDeal in live.js). */
+object MemberPricing {
+    fun apply(q: PricedQuote, deal: com.suer.mercankuyumculuk.data.member.MemberDeal?): PricedQuote {
+        if (deal == null || (deal.sell <= 0.0 && deal.buy <= 0.0)) return q
+        val pct = deal.unit == "percent"
+        val sell = q.sell?.let { s -> if (deal.sell > 0) (if (pct) s * (1 - deal.sell / 100.0) else s - deal.sell).coerceAtLeast(0.0) else s }
+        val buy = q.buy?.let { b -> if (deal.buy > 0) (if (pct) b * (1 + deal.buy / 100.0) else b + deal.buy) else b }
+        return q.copy(sell = sell, buy = buy, member = true)
     }
 }
 
